@@ -57,7 +57,7 @@ public class Config {
                         .comment("The number of ticks between every generation update.")
                         .translation(PREFIX + ".tier_" + name + ".interval")
                         .worldRestart()
-                        .defineInRange("interval", count, 1, Integer.MAX_VALUE);
+                        .defineInRange("interval", interval, 1, Integer.MAX_VALUE);
 
                 this.count = builder
                         .comment("The amount of items to generate every update.")
@@ -69,12 +69,12 @@ public class Config {
                         .comment("The maximum amount of items to hold in the internal buffer.")
                         .translation(PREFIX + ".tier_" + name + ".max")
                         .worldRestart()
-                        .defineInRange("max", count, 1, Integer.MAX_VALUE);
+                        .defineInRange("max", max, 1, Integer.MAX_VALUE);
 
                 this.pushes = builder
                         .comment("Set to true to enable automatically pushing to inventories above this block.")
                         .translation(PREFIX + ".tier_" + name + ".can_push")
-                        .define("pushes", true);
+                        .define("pushes", pushes);
 
                 builder.pop();
             }
