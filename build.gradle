@@ -1,0 +1,184 @@
+buildscript {
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+    }
+}
+
+plugins {
+  id 'com.github.ben-manes.versions' version '0.25.0'
+  id 'net.minecrell.licenser' version '0.3'
+  id 'org.ajoberstar.grgit' version '2.3.0'
+  id 'com.github.johnrengelman.shadow' version '2.0.4'
+  id 'maven'
+  id 'maven-publish'
+  id 'java'
+  id 'eclipse'
+  id 'idea'
+}
+apply plugin: 'net.minecraftforge.gradle'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    GIT_REPO = 'LexManos/Default'
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.14.4-28.1.67'
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/generated/resources'
+        }
+    }
+}
+
+minecraft {
+    mappings channel: 'snapshot', version: '20191022-1.14.3'
+    //accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    runs {
+        client {
+            workingDirectory project.file('run')
+            //property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                cobblelifebestlife {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+            //property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                cobblelifebestlife {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+            //property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', 'cobblelifebestlife', '--all', '--output', file('src/generated/resources/')
+            mods {
+                cobblelifebestlife {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+group = 'net.minecraftforge.lex'
+version = gitVersion()
+targetCompatibility = sourceCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+
+
+def rsplit(str, del) {
+    def idx = str.lastIndexOf(del)
+    return idx == -1 ? [str, ''] : [str.substring(0, idx), str.substring(idx+1)]
+}
+
+def gitVersion() {
+    def raw = grgit?.describe(longDescr: true)
+    def (desc, hash) = rsplit(raw == null ? 'unknown-offset-hash' : raw, '-')
+    def (tag, offset) = rsplit(desc, '-')
+    project.ext.SPEC_VERSION = tag
+    return "${tag}.${offset}"
+}
+
+license {
+  header project.file('LICENSE-header.txt')
+  newLine false
+}
+
+ext {
+    MANIFEST = manifest{
+        attributes([
+            'Specification-Title':      project.name,
+            'Specification-Vendor':     'Forge Development LLC',
+            'Specification-Version':    SPEC_VERSION,
+            'Implementation-Title':     project.name,
+            'Implementation-Version':   project.version,
+            'Implementation-Vendor':    'Forge Development LLC'
+        ] as LinkedHashMap, project.group.replaceAll('\\.', '/') + '/' + project.name + '/')
+    }
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+    manifest.from(MANIFEST)
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+jar {
+    manifest.from(MANIFEST)
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact sourcesJar
+            artifact jar
+            pom {
+                name = project.archivesBaseName
+                packaging = 'jar'
+                url = "https://github.com/${GIT_REPO}"
+
+                scm {
+                    url = "https://github.com/${GIT_REPO}"
+                    connection = "scm:git:git://github.com/${GIT_REPO}.git"
+                    developerConnection = "scm:git:git@github.com:${GIT_REPO}.git"
+                }
+
+                issueManagement {
+                    system = 'github'
+                    url = "https://github.com/${GIT_REPO}/issues"
+                }
+
+                developers {
+                    developer {
+                        id = 'LexManos'
+                        name = 'Lex Manos'
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            if (project.hasProperty('forgeMavenPassword')) {
+                credentials {
+                    username project.properties.forgeMavenUser
+                    password project.properties.forgeMavenPassword
+                }
+                url 'https://files.minecraftforge.net/maven/manage/upload'
+            } else {
+                url 'file://' + rootProject.file('repo').getAbsolutePath()
+            }
+        }
+    }
+}
