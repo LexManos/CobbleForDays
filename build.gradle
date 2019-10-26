@@ -52,7 +52,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                cobblelifebestlife {
+                cobblefordays {
                     source sourceSets.main
                 }
             }
@@ -64,7 +64,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                cobblelifebestlife {
+                cobblefordays {
                     source sourceSets.main
                 }
             }
@@ -74,9 +74,9 @@ minecraft {
             workingDirectory project.file('run')
             //property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
-            args '--mod', 'cobblelifebestlife', '--all', '--output', file('src/generated/resources/')
+            args '--mod', 'cobblefordays', '--all', '--output', file('src/generated/resources/')
             mods {
-                cobblelifebestlife {
+                cobblefordays {
                     source sourceSets.main
                 }
             }
@@ -108,6 +108,7 @@ license {
 }
 
 ext {
+    changelog = rootProject.file('build/changelog.txt')
     MANIFEST = manifest{
         attributes([
             'Specification-Title':      project.name,
@@ -131,7 +132,10 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 artifacts {
+    archives jar
     archives sourcesJar
+    if (changelog.exists())
+        archives changelog
 }
 
 jar {
@@ -141,8 +145,13 @@ jar {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact sourcesJar
             artifact jar
+            artifact sourcesJar
+            if (changelog.exists()) {
+                artifact(changelog){
+                    classifier 'changelog'
+                }
+            }
             pom {
                 name = project.archivesBaseName
                 packaging = 'jar'

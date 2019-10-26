@@ -3,9 +3,9 @@ loaderVersion="[28,)" #mandatory (28 is current forge version)
 #issueTrackerURL="http://my.issue.tracker/" #optional
 
 [[mods]] #mandatory
-    modId="cobblelifebestlife" #mandatory
+    modId="cobblefordays" #mandatory
     version="${file.jarVersion}" #mandatory
-    displayName="Cobble Life Best Life" #mandatory
+    displayName="Cobble For Days" #mandatory
     #updateJSONURL="http://myurl.me/" #optional
     #displayURL="http://example.com/" #optional
     #logoFile="examplemod.png" #optional
