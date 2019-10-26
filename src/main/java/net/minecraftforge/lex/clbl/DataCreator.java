@@ -198,8 +198,8 @@ public class DataCreator {
 
         private void makeTier(Block block, ResourceLocation texture) {
             ModelFile model = getBuilder(block.getRegistryName().getPath())
-                .parent(getExistingFile(mcLoc("cube_all")))
-                .texture("all", texture);
+                .parent(new ModelFile.UncheckedModelFile(modLoc("block/cobblefordays_generator")))
+                .texture("material", texture);
             getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder().modelFile(model).build());
         }
     }

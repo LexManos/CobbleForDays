@@ -1,6 +1,6 @@
 {
-  "parent": "block/cube_all",
+  "parent": "cobblelifebestlife:block/cobblefordays_generator",
   "textures": {
-    "all": "block/acacia_log"
+    "material": "block/acacia_log"
   }
 }
