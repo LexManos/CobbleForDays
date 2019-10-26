@@ -1,6 +1,6 @@
 {
-  "parent": "block/cube_all",
+  "parent": "cobblefordays:block/generator",
   "textures": {
-    "all": "block/diamond_block"
+    "material": "block/diamond_block"
   }
 }
