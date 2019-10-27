@@ -130,6 +130,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
     manifest.from(MANIFEST)
 }
+jar.finalizedBy('reobfJar')
 
 artifacts {
     archives jar
