@@ -104,21 +104,22 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
         }
     }
 
-    public void updateCache(LazyOptional<IItemHandler> cache) {
-        if (this.cache != cache) {
-            this.cache = cache;
-            cache.addListener(l -> this.cache = LazyOptional.empty());
+    public void updateCache() {
+        TileEntity tileEntity = world != null ? world.getTileEntity(pos.up()) : null;
+        if (tileEntity != null){
+            LazyOptional<IItemHandler> lazyOptional = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
+            if (lazyOptional.isPresent()) {
+                if (this.cache != lazyOptional) {
+                    this.cache = lazyOptional;
+                    cache.addListener(l -> this.cache = LazyOptional.empty());
+                }
+            }
         }
     }
 
     @Override
     public void onLoad() {
-        TileEntity tileEntity = world != null ? world.getTileEntity(pos.up()) : null;
-        if (tileEntity != null){
-            LazyOptional<IItemHandler> lazyOptional = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
-            if (lazyOptional.isPresent())
-                updateCache(lazyOptional);
-        }
+        updateCache();
     }
 
     private void push() {
