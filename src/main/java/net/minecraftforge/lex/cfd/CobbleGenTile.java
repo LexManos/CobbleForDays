@@ -17,7 +17,6 @@
  */
 package net.minecraftforge.lex.cfd;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
@@ -25,7 +24,6 @@ import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -35,27 +33,35 @@ import net.minecraftforge.lex.cfd.Config.Server.Tier;
 
 import static net.minecraftforge.lex.cfd.CobbleForDays.*;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
     private final ConfigCache config;
     private final LazyOptional<IItemHandler> inventory = LazyOptional.of(Inventory::new);
+    private LazyOptional<IItemHandler> cache = LazyOptional.empty();
     private int count = 0;
     private int timer = 20;
     private int configTimer = 200;
 
     public CobbleGenTile(Tier tier, TileEntityType<?> tileType) {
         super(tileType);
-        this.config  = new ConfigCache(tier);
+        this.config = new ConfigCache(tier);
         this.timer = tier.interval.get();
     }
 
     @Override
-    @Nullable
+    @Nonnull
     public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
        if (!this.removed && cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY )
           return inventory.cast();
        return super.getCapability(cap, side);
+    }
+
+    @Override
+    public void remove() {
+        inventory.invalidate();
+        super.remove();
     }
 
     @Override
@@ -88,7 +94,7 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
             markDirty();
         }
 
-        if (config.pushes && count > 0) {
+        if (config.pushes && count > 0 && cache.isPresent()) {
             push();
         }
 
@@ -98,22 +104,30 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
         }
     }
 
+    public void setCache(LazyOptional<IItemHandler> cache) {
+        if (this.cache != cache) {
+            this.cache = cache;
+            cache.addListener(l -> this.cache = LazyOptional.empty());
+        }
+    }
+
+    @Override
+    public void onLoad() {
+        TileEntity tileEntity = world != null ? world.getTileEntity(pos.up()) : null;
+        if (tileEntity != null){
+            LazyOptional<IItemHandler> lazyOptional = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
+            if (lazyOptional.isPresent())
+                setCache(lazyOptional);
+        }
+    }
+
     private void push() {
-        BlockPos targetPos = getPos().up();
-        BlockState state = getWorld().getBlockState(targetPos);
-        if (!state.hasTileEntity())
-            return;
-
-        TileEntity te = getWorld().getTileEntity(targetPos);
-        if (te == null)
-            return;
-
-        LazyOptional<IItemHandler> handler = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
-        if (!handler.isPresent()) //TODO: Cache
-            return;
-
         ItemStack stack = new ItemStack(Items.COBBLESTONE, count);
-        ItemStack result = ItemHandlerHelper.insertItemStacked(handler.orElse(null), stack, false);
+        //ItemStack result = ItemHandlerHelper.insertItemStacked(handler.orElse(null), stack, false);
+        ItemStack result = cache
+                .map(iItemHandler -> ItemHandlerHelper.insertItemStacked(iItemHandler, stack, false))
+                .orElse(stack);
+
         if (result.isEmpty()) {
             count = 0;
             markDirty();
@@ -151,11 +165,13 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
         }
 
         @Override
+        @Nonnull
         public ItemStack getStackInSlot(int slot) {
             return stack;
         }
 
         @Override
+        @Nonnull
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
             if (count == 0 || amount == 0)
                 return ItemStack.EMPTY;
@@ -169,16 +185,17 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
 
         @Override
         public int getSlotLimit(int slot) {
-            return Integer.MAX_VALUE;
+            return config.max;
         }
 
         @Override
-        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+        @Nonnull
+        public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
             return ItemStack.EMPTY;
         }
 
         @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
+        public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
             return false;
         }
     }

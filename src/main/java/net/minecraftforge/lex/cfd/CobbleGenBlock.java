@@ -23,9 +23,20 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.World;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 public class CobbleGenBlock extends Block {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private final int tier;
     public CobbleGenBlock(int tier, Properties properties) {
         super(properties);
@@ -46,5 +57,19 @@ public class CobbleGenBlock extends Block {
     @Nullable
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
         return CobbleGenTile.create(this.tier);
+    }
+
+    @Override
+    public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean p_220069_6_) {
+        if (!pos.up().equals(fromPos)) return;
+        TileEntity tileEntity = world.getTileEntity(fromPos);
+        if (tileEntity != null){
+            LazyOptional<IItemHandler> lazyOptional = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
+            if (lazyOptional.isPresent()){
+                CobbleGenTile cobbleGenTile = (CobbleGenTile) world.getTileEntity(pos);
+                if (cobbleGenTile != null)
+                    cobbleGenTile.setCache(lazyOptional);
+            }
+        }
     }
 }
