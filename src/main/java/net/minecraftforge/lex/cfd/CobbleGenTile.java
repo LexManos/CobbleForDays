@@ -104,7 +104,7 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
         }
     }
 
-    public void setCache(LazyOptional<IItemHandler> cache) {
+    public void updateCache(LazyOptional<IItemHandler> cache) {
         if (this.cache != cache) {
             this.cache = cache;
             cache.addListener(l -> this.cache = LazyOptional.empty());
@@ -117,13 +117,12 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
         if (tileEntity != null){
             LazyOptional<IItemHandler> lazyOptional = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
             if (lazyOptional.isPresent())
-                setCache(lazyOptional);
+                updateCache(lazyOptional);
         }
     }
 
     private void push() {
         ItemStack stack = new ItemStack(Items.COBBLESTONE, count);
-        //ItemStack result = ItemHandlerHelper.insertItemStacked(handler.orElse(null), stack, false);
         ItemStack result = cache
                 .map(iItemHandler -> ItemHandlerHelper.insertItemStacked(iItemHandler, stack, false))
                 .orElse(stack);
@@ -165,13 +164,11 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
         }
 
         @Override
-        @Nonnull
         public ItemStack getStackInSlot(int slot) {
             return stack;
         }
 
         @Override
-        @Nonnull
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
             if (count == 0 || amount == 0)
                 return ItemStack.EMPTY;
@@ -185,17 +182,16 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
 
         @Override
         public int getSlotLimit(int slot) {
-            return config.max;
+            return Integer.MAX_VALUE;
         }
 
         @Override
-        @Nonnull
-        public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
             return ItemStack.EMPTY;
         }
 
         @Override
-        public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+        public boolean isItemValid(int slot, ItemStack stack) {
             return false;
         }
     }

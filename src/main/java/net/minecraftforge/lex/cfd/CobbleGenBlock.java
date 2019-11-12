@@ -68,7 +68,7 @@ public class CobbleGenBlock extends Block {
             if (lazyOptional.isPresent()){
                 CobbleGenTile cobbleGenTile = (CobbleGenTile) world.getTileEntity(pos);
                 if (cobbleGenTile != null)
-                    cobbleGenTile.setCache(lazyOptional);
+                    cobbleGenTile.updateCache(lazyOptional);
             }
         }
     }
