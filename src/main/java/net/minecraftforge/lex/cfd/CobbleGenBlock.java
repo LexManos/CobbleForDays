@@ -26,12 +26,9 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 public class CobbleGenBlock extends Block {
-    private static final Logger LOGGER = LogManager.getLogger();
 
     private final int tier;
     public CobbleGenBlock(int tier, Properties properties) {
