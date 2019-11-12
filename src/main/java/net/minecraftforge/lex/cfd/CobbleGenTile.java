@@ -111,10 +111,12 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
             if (lazyOptional.isPresent()) {
                 if (this.cache != lazyOptional) {
                     this.cache = lazyOptional;
-                    cache.addListener(l -> this.cache = LazyOptional.empty());
+                    cache.addListener(l -> updateCache());
                 }
             }
+            else cache = LazyOptional.empty();
         }
+        else cache = LazyOptional.empty();
     }
 
     @Override
