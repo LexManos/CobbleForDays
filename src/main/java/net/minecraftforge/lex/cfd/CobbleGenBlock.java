@@ -23,7 +23,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.World;
 
 public class CobbleGenBlock extends Block {
     private final int tier;
@@ -46,5 +48,11 @@ public class CobbleGenBlock extends Block {
     @Nullable
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
         return CobbleGenTile.create(this.tier);
+    }
+
+    @Override
+    public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean p_220069_6_) {
+        if (pos.up().equals(fromPos))
+            ((CobbleGenTile)world.getTileEntity(pos)).updateCache();
     }
 }
