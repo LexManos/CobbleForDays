@@ -27,9 +27,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
-
 public class CobbleGenBlock extends Block {
-
     private final int tier;
     public CobbleGenBlock(int tier, Properties properties) {
         super(properties);
@@ -54,7 +52,7 @@ public class CobbleGenBlock extends Block {
 
     @Override
     public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean p_220069_6_) {
-        if (!pos.up().equals(fromPos))
-            ((CobbleGenTile) world.getTileEntity(pos)).updateCache();
+        if (pos.up().equals(fromPos))
+            ((CobbleGenTile)world.getTileEntity(pos)).updateCache();
     }
 }
