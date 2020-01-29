@@ -117,7 +117,7 @@ ext {
             'Implementation-Title':     project.name,
             'Implementation-Version':   project.version,
             'Implementation-Vendor':    'Forge Development LLC'
-        ] as LinkedHashMap, project.group.replaceAll('\\.', '/') + '/' + project.name + '/')
+        ] as LinkedHashMap)
     }
 }
 
