@@ -19,6 +19,8 @@ package net.minecraftforge.lex.cfd;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -89,7 +91,14 @@ public class CobbleForDays {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.serverSpec);
     }
 
-    private void setupClient(final FMLClientSetupEvent event) {}
+    private void setupClient(final FMLClientSetupEvent event) {
+        RenderTypeLookup.setRenderLayer(TIER1_BLOCK.get(), RenderType.cutout());
+        RenderTypeLookup.setRenderLayer(TIER2_BLOCK.get(), RenderType.cutout());
+        RenderTypeLookup.setRenderLayer(TIER3_BLOCK.get(), RenderType.cutout());
+        RenderTypeLookup.setRenderLayer(TIER4_BLOCK.get(), RenderType.cutout());
+        RenderTypeLookup.setRenderLayer(TIER5_BLOCK.get(), RenderType.cutout());
+    }
+
     private void setup(final FMLCommonSetupEvent event) {}
 
     public void colorGeneratorBlockWater(ColorHandlerEvent.Block event) {

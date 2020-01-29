@@ -46,7 +46,7 @@ import net.minecraft.world.storage.loot.LootParameterSet;
 import net.minecraft.world.storage.loot.LootParameterSets;
 import net.minecraft.world.storage.loot.LootTable;
 import net.minecraft.world.storage.loot.LootTableManager;
-import net.minecraft.world.storage.loot.ValidationResults;
+import net.minecraft.world.storage.loot.ValidationTracker;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ExistingFileHelper;
@@ -119,8 +119,8 @@ public class DataCreator {
         }
 
         @Override
-        protected void validate(Map<ResourceLocation, LootTable> map, ValidationResults validationresults) {
-           map.forEach((name, table) -> LootTableManager.func_215302_a(validationresults, name, table, map::get));
+        protected void validate(Map<ResourceLocation, LootTable> map, ValidationTracker validationresults) {
+           map.forEach((name, table) -> LootTableManager.func_227508_a_(validationresults, name, table));
         }
 
         private class Blocks extends BlockLootTables {
@@ -197,8 +197,8 @@ public class DataCreator {
         }
 
         private void makeTier(Block block, ResourceLocation texture) {
-            ModelFile model = getBuilder(block.getRegistryName().getPath())
-                .parent(getExistingFile(modLoc("block/generator")))
+            ModelFile model = models().getBuilder(block.getRegistryName().getPath())
+                .parent(models().getExistingFile(modLoc("block/generator")))
                 .texture("material", texture);
             getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder().modelFile(model).build());
         }
