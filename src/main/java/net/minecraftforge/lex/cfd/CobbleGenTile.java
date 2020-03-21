@@ -39,7 +39,7 @@ import javax.annotation.Nullable;
 public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
     private final ConfigCache config;
     private final LazyOptional<IItemHandler> inventory = LazyOptional.of(Inventory::new);
-    private LazyOptional<IItemHandler> cache = LazyOptional.empty();
+    private LazyOptional<IItemHandler> cache = null;
     private int count = 0;
     private int timer = 20;
     private int configTimer = 200;
@@ -94,7 +94,7 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
             markDirty();
         }
 
-        if (config.pushes && count > 0 && cache.isPresent()) {
+        if (config.pushes && count > 0 && getCache().isPresent()) {
             push();
         }
 
@@ -119,14 +119,15 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
         else cache = LazyOptional.empty();
     }
 
-    @Override
-    public void onLoad() {
-        updateCache();
+    private LazyOptional<IItemHandler> getCache() {
+        if (cache == null)
+            updateCache();
+        return cache;
     }
 
     private void push() {
         ItemStack stack = new ItemStack(Items.COBBLESTONE, count);
-        ItemStack result = cache
+        ItemStack result = getCache()
                 .map(iItemHandler -> ItemHandlerHelper.insertItemStacked(iItemHandler, stack, false))
                 .orElse(stack);
 
