@@ -23,10 +23,17 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.IBooleanFunction;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
 public class CobbleGenBlock extends Block {
+    private static final VoxelShape RENDER_SHAPE = VoxelShapes.combineAndSimplify(
+            makeCuboidShape(0.0D,  0.0D, 0.0D, 16.0D,  4.0D, 16.0D),
+            makeCuboidShape(0.0D, 12.0D, 0.0D, 16.0D, 16.0D, 16.0D),
+            IBooleanFunction.OR);
     private final int tier;
     public CobbleGenBlock(int tier, Properties properties) {
         super(properties);
@@ -48,5 +55,10 @@ public class CobbleGenBlock extends Block {
     public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean p_220069_6_) {
         if (pos.up().equals(fromPos))
             ((CobbleGenTile)world.getTileEntity(pos)).updateCache();
+    }
+
+    @Override
+    public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos) {
+       return RENDER_SHAPE;
     }
 }
