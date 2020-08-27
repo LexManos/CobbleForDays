@@ -65,11 +65,11 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
         super.remove();
     }
 
+
     // @mcp: func_230337_a_ = read
     @Override
     public void func_230337_a_(BlockState state, CompoundNBT nbt) {
         super.func_230337_a_(state, nbt);
-
         count = nbt.getInt("count");
         timer = nbt.getInt("timer");
     }
