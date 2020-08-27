@@ -1,5 +1,5 @@
 modLoader="javafml" #mandatory
-loaderVersion="[30,)" #mandatory
+loaderVersion="[32,)" #mandatory
 
 [[mods]] #mandatory
     modId="cobblefordays" #mandatory
