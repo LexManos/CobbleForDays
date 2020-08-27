@@ -38,15 +38,15 @@ import net.minecraft.data.ShapedRecipeBuilder;
 import net.minecraft.data.loot.BlockLootTables;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.loot.LootParameterSet;
+import net.minecraft.loot.LootParameterSets;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.LootTableManager;
+import net.minecraft.loot.ValidationTracker;
+import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.storage.loot.LootParameterSet;
-import net.minecraft.world.storage.loot.LootParameterSets;
-import net.minecraft.world.storage.loot.LootTable;
-import net.minecraft.world.storage.loot.LootTableManager;
-import net.minecraft.world.storage.loot.ValidationTracker;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ExistingFileHelper;
@@ -92,7 +92,7 @@ public class DataCreator {
             getTier(TIER5_BLOCK.get(), Tags.Items.GEMS_DIAMOND).build(consumer);
         }
 
-        private ShapedRecipeBuilder getTier(IItemProvider item, Tag<Item> resource) {
+        private ShapedRecipeBuilder getTier(IItemProvider item, ITag<Item> resource) {
             return ShapedRecipeBuilder.shapedRecipe(item)
                 .key('W', Items.WATER_BUCKET)
                 .key('L', Items.LAVA_BUCKET)
