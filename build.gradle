@@ -31,7 +31,7 @@ ext {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.15.2-31.0.1'
+    minecraft 'net.minecraftforge:forge:1.16.2-33.0.22'
 }
 
 sourceSets {
@@ -43,7 +43,7 @@ sourceSets {
 }
 
 minecraft {
-    mappings channel: 'snapshot', version: '20200129-1.15.1'
+    mappings channel: 'snapshot', version: '20200514-1.16'
     //accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {

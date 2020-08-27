@@ -1,5 +1,6 @@
 modLoader="javafml" #mandatory
-loaderVersion="[30,)" #mandatory
+loaderVersion="[33,)" #mandatory
+license="LGPL 2.1"
 
 [[mods]] #mandatory
     modId="cobblefordays" #mandatory
