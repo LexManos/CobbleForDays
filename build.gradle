@@ -31,7 +31,7 @@ ext {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.2-33.0.22'
+    minecraft 'net.minecraftforge:forge:1.16.2-33.0.37'
 }
 
 sourceSets {
