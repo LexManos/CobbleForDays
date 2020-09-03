@@ -26,6 +26,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.world.biome.BiomeColors;
+import net.minecraft.world.biome.BiomeRegistry;
 import net.minecraft.world.biome.Biomes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
@@ -103,14 +104,14 @@ public class CobbleForDays {
 
     public void colorGeneratorBlockWater(ColorHandlerEvent.Block event) {
         event.getBlockColors().register(
-                (blockState, environmentBlockReader, pos, index) -> index == 1 ? environmentBlockReader != null && pos != null ? BiomeColors.getWaterColor(environmentBlockReader, pos) : Biomes.PLAINS.getWaterColor() : -1,
+                (blockState, environmentBlockReader, pos, index) -> index == 1 ? environmentBlockReader != null && pos != null ? BiomeColors.getWaterColor(environmentBlockReader, pos) : BiomeRegistry.field_244200_a.getWaterColor() : -1,
                 BLOCKS.getEntries().stream().filter(RegistryObject::isPresent).map(RegistryObject::get).toArray(Block[]::new)
         );
     }
 
     public void colorGeneratorItemWater(ColorHandlerEvent.Item event) {
         event.getItemColors().register(
-                (stack, index) -> index == 1 ? Biomes.PLAINS.getWaterColor() : -1,
+                (stack, index) -> index == 1 ? BiomeRegistry.field_244200_a.getWaterColor() : -1,
                 ITEMS.getEntries().stream().filter(RegistryObject::isPresent).map(RegistryObject::get).toArray(Item[]::new)
         );
     }
