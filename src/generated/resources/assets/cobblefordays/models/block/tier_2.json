@@ -1,6 +1,6 @@
 {
   "parent": "cobblefordays:block/generator",
   "textures": {
-    "material": "block/cobblestone"
+    "material": "minecraft:block/cobblestone"
   }
 }

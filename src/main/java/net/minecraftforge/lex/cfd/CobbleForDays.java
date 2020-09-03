@@ -50,11 +50,11 @@ public class CobbleForDays {
     @SuppressWarnings("unused")
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static final DeferredRegister<Item> ITEMS = new DeferredRegister<>(ForgeRegistries.ITEMS, MODID);
-    public static final DeferredRegister<Block> BLOCKS = new DeferredRegister<>(ForgeRegistries.BLOCKS, MODID);
-    public static final DeferredRegister<TileEntityType<?>> TILES = new DeferredRegister<>(ForgeRegistries.TILE_ENTITIES, MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
+    public static final DeferredRegister<TileEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, MODID);
 
-    private static final Block.Properties blockProps = Block.Properties.create(Material.GLASS).hardnessAndResistance(3.5F).lightValue(15);
+    private static final Block.Properties blockProps = Block.Properties.create(Material.GLASS).hardnessAndResistance(3.5F).func_235838_a_(state -> 15); // @mcp: func_235838_a_ = lightLevel
     private static final Item.Properties  itemProps  = new Item.Properties().group(ItemGroup.MISC);
 
     public static final RegistryObject<Block> TIER1_BLOCK = BLOCKS.register("tier_1", () -> new CobbleGenBlock(1, blockProps));
@@ -92,11 +92,11 @@ public class CobbleForDays {
     }
 
     private void setupClient(final FMLClientSetupEvent event) {
-        RenderTypeLookup.setRenderLayer(TIER1_BLOCK.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(TIER2_BLOCK.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(TIER3_BLOCK.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(TIER4_BLOCK.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(TIER5_BLOCK.get(), RenderType.cutout());
+        RenderTypeLookup.setRenderLayer(TIER1_BLOCK.get(), RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(TIER2_BLOCK.get(), RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(TIER3_BLOCK.get(), RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(TIER4_BLOCK.get(), RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(TIER5_BLOCK.get(), RenderType.getCutout());
     }
 
     private void setup(final FMLCommonSetupEvent event) {}
