@@ -125,9 +125,21 @@ compileJava {
     options.encoding = 'UTF-8'
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
+//TODO: Temp Until we expose something sane in FG
+task extractRange(type: net.minecraftforge.gradle.common.task.TaskExtractRangeMap, dependsOn: classes) {
+    sources sourceSets.main.java.srcDirs
+    addDependencies compileJava.classpath
+}
+
+task applyRange(type: net.minecraftforge.gradle.common.task.TaskApplyRangeMap, dependsOn: [extractRange, createMcpToSrg]) {
+    rangeMap = extractRange.output
+    srgFiles = [createMcpToSrg.output]
+    sources sourceSets.main.java.srcDirs
+}
+
+task sourcesJar(type: Jar, dependsOn: applyRange) {
     classifier = 'sources'
-    from sourceSets.main.allSource
+    from zipTree(applyRange.output)
     manifest.from(MANIFEST)
 }
 
