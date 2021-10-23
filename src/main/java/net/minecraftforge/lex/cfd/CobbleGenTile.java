@@ -194,7 +194,7 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
 
         @Override
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            return ItemStack.EMPTY;
+            return stack;
         }
 
         @Override
