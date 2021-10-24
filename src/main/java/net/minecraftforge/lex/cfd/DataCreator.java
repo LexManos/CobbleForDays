@@ -84,25 +84,25 @@ public class DataCreator {
         }
 
         @Override
-        protected void registerRecipes(Consumer<IFinishedRecipe> consumer) {
-            getTier(TIER1_BLOCK.get(), ItemTags.LOGS).build(consumer);
-            getTier(TIER2_BLOCK.get(), Tags.Items.COBBLESTONE).build(consumer);
-            getTier(TIER3_BLOCK.get(), Tags.Items.INGOTS_IRON).build(consumer);
-            getTier(TIER4_BLOCK.get(), Tags.Items.INGOTS_GOLD).build(consumer);
-            getTier(TIER5_BLOCK.get(), Tags.Items.GEMS_DIAMOND).build(consumer);
+        protected void buildShapelessRecipes(Consumer<IFinishedRecipe> consumer) {
+            getTier(TIER1_BLOCK.get(), ItemTags.LOGS).save(consumer);
+            getTier(TIER2_BLOCK.get(), Tags.Items.COBBLESTONE).save(consumer);
+            getTier(TIER3_BLOCK.get(), Tags.Items.INGOTS_IRON).save(consumer);
+            getTier(TIER4_BLOCK.get(), Tags.Items.INGOTS_GOLD).save(consumer);
+            getTier(TIER5_BLOCK.get(), Tags.Items.GEMS_DIAMOND).save(consumer);
         }
 
         private ShapedRecipeBuilder getTier(IItemProvider item, ITag<Item> resource) {
-            return ShapedRecipeBuilder.shapedRecipe(item)
-                .key('W', Items.WATER_BUCKET)
-                .key('L', Items.LAVA_BUCKET)
-                .key('G', Blocks.GLASS)
-                .key('R', resource)
-                .patternLine("RRR")
-                .patternLine("WGL")
-                .patternLine("RRR")
-                .addCriterion("has_lava", hasItem(Items.LAVA_BUCKET))
-                .addCriterion("has_water", hasItem(Items.WATER_BUCKET));
+            return ShapedRecipeBuilder.shaped(item)
+                .define('W', Items.WATER_BUCKET)
+                .define('L', Items.LAVA_BUCKET)
+                .define('G', Blocks.GLASS)
+                .define('R', resource)
+                .pattern("RRR")
+                .pattern("WGL")
+                .pattern("RRR")
+                .unlockedBy("has_lava", has(Items.LAVA_BUCKET))
+                .unlockedBy("has_water", has(Items.WATER_BUCKET));
         }
     }
 
@@ -120,17 +120,17 @@ public class DataCreator {
 
         @Override
         protected void validate(Map<ResourceLocation, LootTable> map, ValidationTracker validationresults) {
-           map.forEach((name, table) -> LootTableManager.func_227508_a_(validationresults, name, table));
+           map.forEach((name, table) -> LootTableManager.validate(validationresults, name, table));
         }
 
         private class Blocks extends BlockLootTables {
             @Override
             protected void addTables() {
-                this.registerDropSelfLootTable(TIER1_BLOCK.get());
-                this.registerDropSelfLootTable(TIER2_BLOCK.get());
-                this.registerDropSelfLootTable(TIER3_BLOCK.get());
-                this.registerDropSelfLootTable(TIER4_BLOCK.get());
-                this.registerDropSelfLootTable(TIER5_BLOCK.get());
+                this.dropSelf(TIER1_BLOCK.get());
+                this.dropSelf(TIER2_BLOCK.get());
+                this.dropSelf(TIER3_BLOCK.get());
+                this.dropSelf(TIER4_BLOCK.get());
+                this.dropSelf(TIER5_BLOCK.get());
             }
 
             @Override

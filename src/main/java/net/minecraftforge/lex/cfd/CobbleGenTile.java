@@ -54,29 +54,29 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
     @Override
     @Nonnull
     public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-       if (!this.removed && cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY )
+       if (!this.remove && cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY )
           return inventory.cast();
        return super.getCapability(cap, side);
     }
 
     @Override
-    public void remove() {
+    public void setRemoved() {
         inventory.invalidate();
-        super.remove();
+        super.setRemoved();
     }
 
 
-    // @mcp: func_230337_a_ = read
+    // @mcp: load = read
     @Override
-    public void func_230337_a_(BlockState state, CompoundNBT nbt) {
-        super.func_230337_a_(state, nbt);
+    public void load(BlockState state, CompoundNBT nbt) {
+        super.load(state, nbt);
         count = nbt.getInt("count");
         timer = nbt.getInt("timer");
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT nbt) {
-        super.write(nbt);
+    public CompoundNBT save(CompoundNBT nbt) {
+        super.save(nbt);
         nbt.putInt("count", count);
         nbt.putInt("timer", timer);
         return nbt;
@@ -84,7 +84,7 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
 
     @Override
     public void tick() {
-        if (getWorld() != null && getWorld().isRemote) return;
+        if (getLevel() != null && getLevel().isClientSide) return;
         if (timer-- <= 0) {
             count += config.count;
             this.timer = config.interval;
@@ -94,7 +94,7 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
             if (count < 0)
                 count = 0;
 
-            markDirty();
+            setChanged();
         }
 
         if (config.pushes && count > 0 && getCache().isPresent()) {
@@ -108,7 +108,7 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
     }
 
     public void updateCache() {
-        TileEntity tileEntity = world != null ? world.getTileEntity(pos.up()) : null;
+        TileEntity tileEntity = level != null ? level.getBlockEntity(worldPosition.above()) : null;
         if (tileEntity != null){
             LazyOptional<IItemHandler> lazyOptional = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
             if (lazyOptional.isPresent()) {
@@ -136,10 +136,10 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
 
         if (result.isEmpty()) {
             count = 0;
-            markDirty();
+            setChanged();
         } else if (result.getCount() != count) {
             count = result.getCount();
-            markDirty();
+            setChanged();
         }
     }
 
@@ -182,7 +182,7 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
             int ret = Math.min(count, amount);
             if (!simulate) {
                 count -= ret;
-                CobbleGenTile.this.markDirty();
+                CobbleGenTile.this.setChanged();
             }
             return new ItemStack(Items.COBBLESTONE, ret);
         }
@@ -194,7 +194,7 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
 
         @Override
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            return ItemStack.EMPTY;
+            return stack;
         }
 
         @Override
