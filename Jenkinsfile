@@ -34,7 +34,7 @@ pipeline {
                 }
             }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'maven-forge-user', usernameVariable: 'MAVEN_USER', passwordVariable: 'MAVEN_PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: 'maven-lex-user', usernameVariable: 'MAVEN_USER', passwordVariable: 'MAVEN_PASSWORD')]) {
                     withGradle {
                         sh './gradlew ${GRADLE_ARGS} publish'
                     }
