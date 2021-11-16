@@ -84,8 +84,8 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
 
     @Override
     public void tick() {
-        if (getLevel() != null && getLevel().isClientSide) return;
-        if (timer-- <= 0) {
+        if (getLevel() == null || getLevel().isClientSide) return;
+        if (--timer <= 0) {
             count += config.count;
             this.timer = config.interval;
 
@@ -101,7 +101,7 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
             push();
         }
 
-        if (configTimer-- <= 0) {
+        if (--configTimer <= 0) {
             config.update();
             configTimer = 200;
         }
