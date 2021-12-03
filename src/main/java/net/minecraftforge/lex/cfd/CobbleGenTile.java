@@ -172,6 +172,7 @@ public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
 
         @Override
         public ItemStack getStackInSlot(int slot) {
+            stack.setCount(count);
             return stack;
         }
 
