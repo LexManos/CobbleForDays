@@ -17,22 +17,22 @@
  */
 package net.minecraftforge.lex.cfd;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.material.Material;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.world.biome.BiomeColors;
-import net.minecraft.world.biome.BiomeRegistry;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.client.renderer.BiomeColors;
+import net.minecraft.data.worldgen.biome.Biomes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -52,11 +52,11 @@ public class CobbleForDays {
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
-    public static final DeferredRegister<TileEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, MODID);
+    public static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, MODID);
 
     private static final Block.Properties blockProps = Block.Properties.of(Material.GLASS).strength(3.5F).lightLevel(state -> 15); // @mcp: lightLevel = lightLevel
-    private static final Item.Properties  itemProps  = new Item.Properties().tab(ItemGroup.TAB_MISC);
-
+    private static final Item.Properties  itemProps  = new Item.Properties().tab(CreativeModeTab.TAB_MISC);
+    
     public static final RegistryObject<Block> TIER1_BLOCK = BLOCKS.register("tier_1", () -> new CobbleGenBlock(1, blockProps));
     public static final RegistryObject<Block> TIER2_BLOCK = BLOCKS.register("tier_2", () -> new CobbleGenBlock(2, blockProps));
     public static final RegistryObject<Block> TIER3_BLOCK = BLOCKS.register("tier_3", () -> new CobbleGenBlock(3, blockProps));
@@ -67,11 +67,11 @@ public class CobbleForDays {
     public static final RegistryObject<Item>  TIER3_ITEM  = ITEMS .register("tier_3", () -> new BlockItem(TIER3_BLOCK.get(), itemProps));
     public static final RegistryObject<Item>  TIER4_ITEM  = ITEMS .register("tier_4", () -> new BlockItem(TIER4_BLOCK.get(), itemProps));
     public static final RegistryObject<Item>  TIER5_ITEM  = ITEMS .register("tier_5", () -> new BlockItem(TIER5_BLOCK.get(), itemProps));
-    public static final RegistryObject<TileEntityType<CobbleGenTile>> TIER1_TILE = TILES.register("tier_1", () -> TileEntityType.Builder.of(() -> CobbleGenTile.create(1), TIER1_BLOCK.get()).build(null));
-    public static final RegistryObject<TileEntityType<CobbleGenTile>> TIER2_TILE = TILES.register("tier_2", () -> TileEntityType.Builder.of(() -> CobbleGenTile.create(2), TIER2_BLOCK.get()).build(null));
-    public static final RegistryObject<TileEntityType<CobbleGenTile>> TIER3_TILE = TILES.register("tier_3", () -> TileEntityType.Builder.of(() -> CobbleGenTile.create(3), TIER3_BLOCK.get()).build(null));
-    public static final RegistryObject<TileEntityType<CobbleGenTile>> TIER4_TILE = TILES.register("tier_4", () -> TileEntityType.Builder.of(() -> CobbleGenTile.create(4), TIER4_BLOCK.get()).build(null));
-    public static final RegistryObject<TileEntityType<CobbleGenTile>> TIER5_TILE = TILES.register("tier_5", () -> TileEntityType.Builder.of(() -> CobbleGenTile.create(5), TIER5_BLOCK.get()).build(null));
+    public static final RegistryObject<BlockEntityType<CobbleGenTile>> TIER1_TILE = TILES.register("tier_1", () -> BlockEntityType.Builder.of(CobbleGenTile.createSupplier(1), TIER1_BLOCK.get()).build(null));
+    public static final RegistryObject<BlockEntityType<CobbleGenTile>> TIER2_TILE = TILES.register("tier_2", () -> BlockEntityType.Builder.of(CobbleGenTile.createSupplier(2), TIER2_BLOCK.get()).build(null));
+    public static final RegistryObject<BlockEntityType<CobbleGenTile>> TIER3_TILE = TILES.register("tier_3", () -> BlockEntityType.Builder.of(CobbleGenTile.createSupplier(3), TIER3_BLOCK.get()).build(null));
+    public static final RegistryObject<BlockEntityType<CobbleGenTile>> TIER4_TILE = TILES.register("tier_4", () -> BlockEntityType.Builder.of(CobbleGenTile.createSupplier(4), TIER4_BLOCK.get()).build(null));
+    public static final RegistryObject<BlockEntityType<CobbleGenTile>> TIER5_TILE = TILES.register("tier_5", () -> BlockEntityType.Builder.of(CobbleGenTile.createSupplier(5), TIER5_BLOCK.get()).build(null));
 
     public CobbleForDays() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
@@ -92,25 +92,25 @@ public class CobbleForDays {
     }
 
     private void setupClient(final FMLClientSetupEvent event) {
-        RenderTypeLookup.setRenderLayer(TIER1_BLOCK.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(TIER2_BLOCK.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(TIER3_BLOCK.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(TIER4_BLOCK.get(), RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(TIER5_BLOCK.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(TIER1_BLOCK.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(TIER2_BLOCK.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(TIER3_BLOCK.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(TIER4_BLOCK.get(), RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(TIER5_BLOCK.get(), RenderType.cutout());
     }
 
     private void setup(final FMLCommonSetupEvent event) {}
 
     public void colorGeneratorBlockWater(ColorHandlerEvent.Block event) {
         event.getBlockColors().register(
-                (blockState, environmentBlockReader, pos, index) -> index == 1 ? environmentBlockReader != null && pos != null ? BiomeColors.getAverageWaterColor(environmentBlockReader, pos) : BiomeRegistry.PLAINS.getWaterColor() : -1,
+                (blockState, environmentBlockReader, pos, index) -> index == 1 ? environmentBlockReader != null && pos != null ? BiomeColors.getAverageWaterColor(environmentBlockReader, pos) : Biomes.PLAINS.getWaterColor() : -1,
                 BLOCKS.getEntries().stream().filter(RegistryObject::isPresent).map(RegistryObject::get).toArray(Block[]::new)
         );
     }
 
     public void colorGeneratorItemWater(ColorHandlerEvent.Item event) {
         event.getItemColors().register(
-                (stack, index) -> index == 1 ? BiomeRegistry.PLAINS.getWaterColor() : -1,
+                (stack, index) -> index == 1 ? Biomes.PLAINS.getWaterColor() : -1,
                 ITEMS.getEntries().stream().filter(RegistryObject::isPresent).map(RegistryObject::get).toArray(Item[]::new)
         );
     }
