@@ -17,14 +17,18 @@
  */
 package net.minecraftforge.lex.cfd;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
+
+import com.google.common.base.Ticker;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.core.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -37,181 +41,202 @@ import static net.minecraftforge.lex.cfd.CobbleForDays.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class CobbleGenTile extends TileEntity implements ITickableTileEntity {
-    private final ConfigCache config;
-    private final LazyOptional<IItemHandler> inventory = LazyOptional.of(Inventory::new);
-    private LazyOptional<IItemHandler> cache = null;
-    private int count = 0;
-    private int timer = 20;
-    private int configTimer = 200;
-
-    public CobbleGenTile(Tier tier, TileEntityType<?> tileType) {
-        super(tileType);
-        this.config = new ConfigCache(tier);
-        this.timer = tier.interval.get();
-    }
-
-    @Override
-    @Nonnull
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-       if (!this.remove && cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY )
-          return inventory.cast();
-       return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void setRemoved() {
-        inventory.invalidate();
-        super.setRemoved();
-    }
-
-
-    // @mcp: load = read
-    @Override
-    public void load(BlockState state, CompoundNBT nbt) {
-        super.load(state, nbt);
-        count = nbt.getInt("count");
-        timer = nbt.getInt("timer");
-    }
-
-    @Override
-    public CompoundNBT save(CompoundNBT nbt) {
-        super.save(nbt);
-        nbt.putInt("count", count);
-        nbt.putInt("timer", timer);
-        return nbt;
-    }
-
-    @Override
-    public void tick() {
-        if (getLevel() == null || getLevel().isClientSide) return;
-        if (--timer <= 0) {
-            count += config.count;
-            this.timer = config.interval;
-
-            if (count > config.max)
-                count = config.max;
-            if (count < 0)
-                count = 0;
-
-            setChanged();
-        }
-
-        if (config.pushes && count > 0 && getCache().isPresent()) {
-            push();
-        }
-
-        if (--configTimer <= 0) {
-            config.update();
-            configTimer = 200;
-        }
-    }
-
-    public void updateCache() {
-        TileEntity tileEntity = level != null ? level.getBlockEntity(worldPosition.above()) : null;
-        if (tileEntity != null){
-            LazyOptional<IItemHandler> lazyOptional = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
-            if (lazyOptional.isPresent()) {
-                if (this.cache != lazyOptional) {
-                    this.cache = lazyOptional;
-                    cache.addListener(l -> updateCache());
-                }
-            }
-            else cache = LazyOptional.empty();
-        }
-        else cache = LazyOptional.empty();
-    }
-
-    private LazyOptional<IItemHandler> getCache() {
-        if (cache == null)
-            updateCache();
-        return cache;
-    }
-
-    private void push() {
-        ItemStack stack = new ItemStack(Items.COBBLESTONE, count);
-        ItemStack result = getCache()
-                .map(iItemHandler -> ItemHandlerHelper.insertItemStacked(iItemHandler, stack, false))
-                .orElse(stack);
-
-        if (result.isEmpty()) {
-            count = 0;
-            setChanged();
-        } else if (result.getCount() != count) {
-            count = result.getCount();
-            setChanged();
-        }
-    }
-
-    private static class ConfigCache {
-        private final Tier tier;
-        private int interval;
-        private int count;
-        private int max;
-        private boolean pushes;
-
-        private ConfigCache(Tier tier) {
-            this.tier = tier;
-            update();
-        }
-
-        private void update() {
-            this.interval = this.tier.interval.get();
-            this.count = this.tier.count.get();
-            this.max = this.tier.max.get();
-            this.pushes = this.tier.pushes.get();
-        }
-    }
-
-    private class Inventory implements IItemHandler {
-        private final ItemStack stack = new ItemStack(Items.COBBLESTONE, 0);
-        @Override
-        public int getSlots() {
-            return 1;
-        }
-
-        @Override
-        public ItemStack getStackInSlot(int slot) {
-            stack.setCount(count);
-            return stack;
-        }
-
-        @Override
-        public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            if (count == 0 || amount == 0)
-                return ItemStack.EMPTY;
-            int ret = Math.min(count, amount);
-            if (!simulate) {
-                count -= ret;
-                CobbleGenTile.this.setChanged();
-            }
-            return new ItemStack(Items.COBBLESTONE, ret);
-        }
-
-        @Override
-        public int getSlotLimit(int slot) {
-            return Integer.MAX_VALUE;
-        }
-
-        @Override
-        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            return stack;
-        }
-
-        @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
-            return false;
-        }
-    }
-
-    public static CobbleGenTile create(int tier) {
-        switch (tier) {
-            case 1: return new CobbleGenTile(Config.SERVER.tier1, TIER1_TILE.get());
-            case 2: return new CobbleGenTile(Config.SERVER.tier2, TIER2_TILE.get());
-            case 3: return new CobbleGenTile(Config.SERVER.tier3, TIER3_TILE.get());
-            case 4: return new CobbleGenTile(Config.SERVER.tier4, TIER4_TILE.get());
-            case 5: return new CobbleGenTile(Config.SERVER.tier5, TIER5_TILE.get());
-            default: throw new IllegalArgumentException("Unknown Tier: " + tier);
-        }
-    }
+public class CobbleGenTile extends BlockEntity {
+	private final ConfigCache config;
+	private final LazyOptional<IItemHandler> inventory = LazyOptional.of(Inventory::new);
+	private LazyOptional<IItemHandler> cache = null;
+	private int count = 0;
+	private int timer = 20;
+	private int configTimer = 200;
+	
+	public CobbleGenTile(Tier tier, BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
+		super(blockEntityType, blockPos, blockState);
+		this.config = new ConfigCache(tier);
+		this.timer = tier.interval.get();
+	}
+	
+	@Override
+	@Nonnull
+	public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
+		if(!this.remove && cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) return inventory.cast();
+		return super.getCapability(cap, side);
+	}
+	
+	@Override
+	public void setRemoved() {
+		inventory.invalidate();
+		super.setRemoved();
+	}
+	
+	
+	// @mcp: load = read
+	@Override
+	public void load(CompoundTag nbt) {
+		super.load(nbt);
+		count = nbt.getInt("count");
+		timer = nbt.getInt("timer");
+	}
+	
+	@Override
+	public CompoundTag save(CompoundTag nbt) {
+		super.save(nbt);
+		nbt.putInt("count", count);
+		nbt.putInt("timer", timer);
+		return nbt;
+	}
+	
+	public void updateCache() {
+		BlockEntity tileEntity = level != null ? level.getBlockEntity(worldPosition.above()) : null;
+		if(tileEntity != null) {
+			LazyOptional<IItemHandler> lazyOptional = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
+			if(lazyOptional.isPresent()) {
+				if(this.cache != lazyOptional) {
+					this.cache = lazyOptional;
+					cache.addListener(l -> updateCache());
+				}
+			}
+			else {cache = LazyOptional.empty();}
+		}
+		else {cache = LazyOptional.empty();}
+	}
+	
+	private LazyOptional<IItemHandler> getCache() {
+		if(cache == null) updateCache();
+		return cache;
+	}
+	
+	private void push() {
+		ItemStack stack = new ItemStack(Items.COBBLESTONE, count);
+		ItemStack result = getCache().map(iItemHandler -> ItemHandlerHelper.insertItemStacked(iItemHandler, stack, false)).orElse(stack);
+		
+		if(result.isEmpty()) {
+			count = 0;
+			setChanged();
+		}
+		else if(result.getCount() != count) {
+			count = result.getCount();
+			setChanged();
+		}
+	}
+	
+	private static class ConfigCache {
+		private final Tier tier;
+		private int interval;
+		private int count;
+		private int max;
+		private boolean pushes;
+		
+		private ConfigCache(Tier tier) {
+			this.tier = tier;
+			update();
+		}
+		
+		private void update() {
+			this.interval = this.tier.interval.get();
+			this.count = this.tier.count.get();
+			this.max = this.tier.max.get();
+			this.pushes = this.tier.pushes.get();
+		}
+	}
+	
+	private class Inventory implements IItemHandler {
+		private final ItemStack stack = new ItemStack(Items.COBBLESTONE, 0);
+		
+		@Override
+		public int getSlots() {
+			return 1;
+		}
+		
+		@Override
+		public ItemStack getStackInSlot(int slot) {
+			stack.setCount(count);
+			return stack;
+		}
+		
+		@Override
+		public ItemStack extractItem(int slot, int amount, boolean simulate) {
+			if(count == 0 || amount == 0) return ItemStack.EMPTY;
+			int ret = Math.min(count, amount);
+			if(!simulate) {
+				count -= ret;
+				CobbleGenTile.this.setChanged();
+			}
+			return new ItemStack(Items.COBBLESTONE, ret);
+		}
+		
+		@Override
+		public int getSlotLimit(int slot) {
+			return Integer.MAX_VALUE;
+		}
+		
+		@Override
+		public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+			return stack;
+		}
+		
+		@Override
+		public boolean isItemValid(int slot, ItemStack stack) {
+			return false;
+		}
+	}
+	
+	public static class Ticker implements BlockEntityTicker<CobbleGenTile> {
+		@Override
+		public void tick(Level level, BlockPos blockPos, BlockState blockState, CobbleGenTile cobbleGen) {
+			if(level.isClientSide) return;
+			if(--cobbleGen.timer <= 0) {
+				cobbleGen.count += cobbleGen.config.count;
+				cobbleGen.timer = cobbleGen.config.interval;
+				
+				if(cobbleGen.count > cobbleGen.config.max) cobbleGen.count = cobbleGen.config.max;
+				if(cobbleGen.count < 0) cobbleGen.count = 0;
+				
+				cobbleGen.setChanged();
+			}
+			
+			if(cobbleGen.config.pushes && cobbleGen.count > 0 && cobbleGen.getCache().isPresent()) {
+				cobbleGen.push();
+			}
+			
+			if(--cobbleGen.configTimer <= 0) {
+				cobbleGen.config.update();
+				cobbleGen.configTimer = 200;
+			}
+			
+		}
+	}
+	
+	public static CobbleGenTile create(int tier, BlockPos blockPos, BlockState blockState) {
+		switch(tier) {
+			case 1:
+				return new CobbleGenTile(Config.SERVER.tier1, TIER1_TILE.get(), blockPos, blockState);
+			case 2:
+				return new CobbleGenTile(Config.SERVER.tier2, TIER2_TILE.get(), blockPos, blockState);
+			case 3:
+				return new CobbleGenTile(Config.SERVER.tier3, TIER3_TILE.get(), blockPos, blockState);
+			case 4:
+				return new CobbleGenTile(Config.SERVER.tier4, TIER4_TILE.get(), blockPos, blockState);
+			case 5:
+				return new CobbleGenTile(Config.SERVER.tier5, TIER5_TILE.get(), blockPos, blockState);
+			default:
+				throw new IllegalArgumentException("Unknown Tier: " + tier);
+		}
+	}
+	
+	public static BlockEntityType.BlockEntitySupplier<CobbleGenTile> createSupplier(int tier) {
+		switch(tier) {
+			case 1:
+				return (blockPos, blockState) -> new CobbleGenTile(Config.SERVER.tier1, TIER1_TILE.get(), blockPos, blockState);
+			case 2:
+				return (blockPos, blockState) -> new CobbleGenTile(Config.SERVER.tier2, TIER2_TILE.get(), blockPos, blockState);
+			case 3:
+				return (blockPos, blockState) -> new CobbleGenTile(Config.SERVER.tier3, TIER3_TILE.get(), blockPos, blockState);
+			case 4:
+				return (blockPos, blockState) -> new CobbleGenTile(Config.SERVER.tier4, TIER4_TILE.get(), blockPos, blockState);
+			case 5:
+				return (blockPos, blockState) -> new CobbleGenTile(Config.SERVER.tier5, TIER5_TILE.get(), blockPos, blockState);
+			default:
+				throw new IllegalArgumentException("Unknown Tier: " + tier);
+		}
+	}
 }
