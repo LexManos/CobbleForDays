@@ -28,25 +28,25 @@ import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.data.LootTableProvider;
-import net.minecraft.data.RecipeProvider;
-import net.minecraft.data.ShapedRecipeBuilder;
-import net.minecraft.data.loot.BlockLootTables;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.loot.LootParameterSet;
-import net.minecraft.loot.LootParameterSets;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.LootTableManager;
-import net.minecraft.loot.ValidationTracker;
-import net.minecraft.tags.ITag;
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.loot.LootTableProvider;
+import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.LootTables;
+import net.minecraft.world.level.storage.loot.ValidationContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.data.loot.BlockLoot;
+import net.minecraft.tags.Tag;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
@@ -55,10 +55,10 @@ import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.common.data.LanguageProvider;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 @EventBusSubscriber(modid = MODID, bus = Bus.MOD)
 public class DataCreator {
@@ -84,7 +84,7 @@ public class DataCreator {
         }
 
         @Override
-        protected void buildShapelessRecipes(Consumer<IFinishedRecipe> consumer) {
+        protected void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
             getTier(TIER1_BLOCK.get(), ItemTags.LOGS).save(consumer);
             getTier(TIER2_BLOCK.get(), Tags.Items.COBBLESTONE).save(consumer);
             getTier(TIER3_BLOCK.get(), Tags.Items.INGOTS_IRON).save(consumer);
@@ -92,7 +92,7 @@ public class DataCreator {
             getTier(TIER5_BLOCK.get(), Tags.Items.GEMS_DIAMOND).save(consumer);
         }
 
-        private ShapedRecipeBuilder getTier(IItemProvider item, ITag<Item> resource) {
+        private ShapedRecipeBuilder getTier(ItemLike item, Tag<Item> resource) {
             return ShapedRecipeBuilder.shaped(item)
                 .define('W', Items.WATER_BUCKET)
                 .define('L', Items.LAVA_BUCKET)
@@ -112,18 +112,18 @@ public class DataCreator {
         }
 
         @Override
-        protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootParameterSet>> getTables() {
+        protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
             return ImmutableList.of(
-                Pair.of(Blocks::new, LootParameterSets.BLOCK)
+                Pair.of(Blocks::new, LootContextParamSets.BLOCK)
             );
         }
 
         @Override
-        protected void validate(Map<ResourceLocation, LootTable> map, ValidationTracker validationresults) {
-           map.forEach((name, table) -> LootTableManager.validate(validationresults, name, table));
+        protected void validate(Map<ResourceLocation, LootTable> map, ValidationContext validationResults) {
+           map.forEach((name, table) -> LootTables.validate(validationResults, name, table));
         }
 
-        private class Blocks extends BlockLootTables {
+        private class Blocks extends BlockLoot {
             @Override
             protected void addTables() {
                 this.dropSelf(TIER1_BLOCK.get());
@@ -135,7 +135,7 @@ public class DataCreator {
 
             @Override
             protected Iterable<Block> getKnownBlocks() {
-                return (Iterable<Block>)BLOCKS.getEntries().stream().map(RegistryObject::get)::iterator;
+                return BLOCKS.getEntries().stream().map(RegistryObject::get)::iterator;
             }
         }
     }

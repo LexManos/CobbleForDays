@@ -33,7 +33,7 @@ public class Config {
         public final Tier tier5;
 
         Server(ForgeConfigSpec.Builder builder) {
-            builder.comment("Server configuration ssettings")
+            builder.comment("Server configuration settings")
                    .push("server");
             tier1 = new Tier(builder, "1", 1, 40, 64* 1, true);
             tier2 = new Tier(builder, "2", 1, 20, 64* 2, true);
