@@ -75,7 +75,6 @@ public class Config {
                         .comment("Set to true to enable automatically pushing to inventories above this block.")
                         .translation(PREFIX + ".tier_" + name + ".can_push")
                         .define("pushes", pushes);
-
                 builder.pop();
             }
         }
