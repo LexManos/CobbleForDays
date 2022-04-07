@@ -83,7 +83,7 @@ public class CobbleGenTile extends BlockEntity {
     }
 
     public void updateCache() {
-        BlockEntity tileEntity = level != null ? level.getBlockEntity(worldPosition.above()) : null;
+        BlockEntity tileEntity = level != null && level.isLoaded(worldPosition.above()) ? level.getBlockEntity(worldPosition.above()) : null;
         if (tileEntity != null){
             LazyOptional<IItemHandler> lazyOptional = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.DOWN);
             if (lazyOptional.isPresent()) {
