@@ -68,20 +68,18 @@ public class CobbleGenTile extends BlockEntity {
     }
 
 
-    // @mcp: load = read
     @Override
     public void load(CompoundTag nbt) {
         super.load(nbt);
-        count = nbt.getInt("count");
-        timer = nbt.getInt("timer");
+        count = nbt.contains("count") ? nbt.getInt("count") : 0;
+        timer = nbt.contains("timer") ? nbt.getInt("timer") : 0;
     }
 
     @Override
-    public CompoundTag save(CompoundTag nbt) {
-        super.save(nbt);
+    public void saveAdditional(CompoundTag nbt) {
+        super.saveAdditional(nbt);
         nbt.putInt("count", count);
         nbt.putInt("timer", timer);
-        return nbt;
     }
 
     public void updateCache() {
@@ -119,7 +117,7 @@ public class CobbleGenTile extends BlockEntity {
             setChanged();
         }
     }
-    
+
     public static class Ticker implements BlockEntityTicker<CobbleGenTile> {
         @Override
         public void tick(Level level, BlockPos blockPos, BlockState blockState, CobbleGenTile cobbleGen) {
@@ -127,22 +125,22 @@ public class CobbleGenTile extends BlockEntity {
             if(--cobbleGen.timer <= 0) {
                 cobbleGen.count += cobbleGen.config.count;
                 cobbleGen.timer = cobbleGen.config.interval;
-                
+
                 if(cobbleGen.count > cobbleGen.config.max) cobbleGen.count = cobbleGen.config.max;
                 if(cobbleGen.count < 0) cobbleGen.count = 0;
-                
+
                 cobbleGen.setChanged();
             }
-            
+
             if(cobbleGen.config.pushes && cobbleGen.count > 0 && cobbleGen.getCache().isPresent()) {
                 cobbleGen.push();
             }
-            
+
             if(--cobbleGen.configTimer <= 0) {
                 cobbleGen.config.update();
                 cobbleGen.configTimer = 200;
             }
-            
+
         }
     }
 
@@ -217,7 +215,7 @@ public class CobbleGenTile extends BlockEntity {
             default: throw new IllegalArgumentException("Unknown Tier: " + tier);
         }
     }
-    
+
     public static BlockEntityType.BlockEntitySupplier<CobbleGenTile> createSupplier(int tier) {
         return switch(tier) {
             case 1 -> (blockPos, blockState) -> new CobbleGenTile(Config.SERVER.tier1, TIER1_TILE.get(), blockPos, blockState);

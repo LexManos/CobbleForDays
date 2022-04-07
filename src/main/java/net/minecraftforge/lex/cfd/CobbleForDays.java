@@ -17,6 +17,8 @@
  */
 package net.minecraftforge.lex.cfd;
 
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Material;
@@ -26,7 +28,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.client.renderer.BiomeColors;
-import net.minecraft.data.worldgen.biome.Biomes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -56,7 +57,7 @@ public class CobbleForDays {
 
     private static final Block.Properties blockProps = Block.Properties.of(Material.GLASS).strength(3.5F).lightLevel(state -> 15); // @mcp: lightLevel = lightLevel
     private static final Item.Properties  itemProps  = new Item.Properties().tab(CreativeModeTab.TAB_MISC);
-    
+
     public static final RegistryObject<Block> TIER1_BLOCK = BLOCKS.register("tier_1", () -> new CobbleGenBlock(1, blockProps));
     public static final RegistryObject<Block> TIER2_BLOCK = BLOCKS.register("tier_2", () -> new CobbleGenBlock(2, blockProps));
     public static final RegistryObject<Block> TIER3_BLOCK = BLOCKS.register("tier_3", () -> new CobbleGenBlock(3, blockProps));
@@ -72,6 +73,7 @@ public class CobbleForDays {
     public static final RegistryObject<BlockEntityType<CobbleGenTile>> TIER3_TILE = TILES.register("tier_3", () -> BlockEntityType.Builder.of(CobbleGenTile.createSupplier(3), TIER3_BLOCK.get()).build(null));
     public static final RegistryObject<BlockEntityType<CobbleGenTile>> TIER4_TILE = TILES.register("tier_4", () -> BlockEntityType.Builder.of(CobbleGenTile.createSupplier(4), TIER4_BLOCK.get()).build(null));
     public static final RegistryObject<BlockEntityType<CobbleGenTile>> TIER5_TILE = TILES.register("tier_5", () -> BlockEntityType.Builder.of(CobbleGenTile.createSupplier(5), TIER5_BLOCK.get()).build(null));
+    private static final RegistryObject<Biome> PLAINS = RegistryObject.create(Biomes.PLAINS.location(), ForgeRegistries.BIOMES);
 
     public CobbleForDays() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
@@ -103,14 +105,14 @@ public class CobbleForDays {
 
     public void colorGeneratorBlockWater(ColorHandlerEvent.Block event) {
         event.getBlockColors().register(
-                (blockState, environmentBlockReader, pos, index) -> index == 1 ? environmentBlockReader != null && pos != null ? BiomeColors.getAverageWaterColor(environmentBlockReader, pos) : Biomes.PLAINS.getWaterColor() : -1,
+                (blockState, environmentBlockReader, pos, index) -> index == 1 ? environmentBlockReader != null && pos != null ? BiomeColors.getAverageWaterColor(environmentBlockReader, pos) : PLAINS.get().getWaterColor() : -1,
                 BLOCKS.getEntries().stream().filter(RegistryObject::isPresent).map(RegistryObject::get).toArray(Block[]::new)
         );
     }
 
     public void colorGeneratorItemWater(ColorHandlerEvent.Item event) {
         event.getItemColors().register(
-                (stack, index) -> index == 1 ? Biomes.PLAINS.getWaterColor() : -1,
+                (stack, index) -> index == 1 ? PLAINS.get().getWaterColor() : -1,
                 ITEMS.getEntries().stream().filter(RegistryObject::isPresent).map(RegistryObject::get).toArray(Item[]::new)
         );
     }

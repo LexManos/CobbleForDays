@@ -42,20 +42,21 @@ public class CobbleGenBlock extends Block implements EntityBlock {
         super(properties);
         this.tier = tier;
     }
-    
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
         return CobbleGenTile.create(this.tier, blockPos, blockState);
     }
-    
+
+    @SuppressWarnings("unchecked")
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
         return blockEntityType == CobbleForDays.TIER1_TILE.get() || blockEntityType == CobbleForDays.TIER2_TILE.get() || blockEntityType == CobbleForDays.TIER3_TILE.get() ||
                blockEntityType == CobbleForDays.TIER4_TILE.get() || blockEntityType == CobbleForDays.TIER5_TILE.get() ? (BlockEntityTicker<T>) new CobbleGenTile.Ticker() : null;
     }
-    
+
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean p_220069_6_) {
         if (pos.above().equals(fromPos))

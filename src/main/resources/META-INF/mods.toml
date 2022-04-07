@@ -1,10 +1,10 @@
-modLoader="javafml" #mandatory
-loaderVersion="[33,)" #mandatory
+modLoader="javafml"
+loaderVersion="[40,)"
 license="LGPL 2.1"
 
-[[mods]] #mandatory
-    modId="cobblefordays" #mandatory
-    version="${file.jarVersion}" #mandatory
-    displayName="Cobble For Days" #mandatory
-    authors="Lex" #optional
+[[mods]]
+    modId="cobblefordays"
+    version="${file.jarVersion}"
+    displayName="Cobble For Days"
+    authors="Lex"
     description="A set of simple cobblestone generators. Mainly useful for servers that don't want multi-block cobblegens."

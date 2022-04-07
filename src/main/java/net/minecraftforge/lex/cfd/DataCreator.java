@@ -43,7 +43,7 @@ import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.data.loot.BlockLoot;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.resources.ResourceLocation;
@@ -92,7 +92,7 @@ public class DataCreator {
             getTier(TIER5_BLOCK.get(), Tags.Items.GEMS_DIAMOND).save(consumer);
         }
 
-        private ShapedRecipeBuilder getTier(ItemLike item, Tag<Item> resource) {
+        private ShapedRecipeBuilder getTier(ItemLike item, TagKey<Item> resource) {
             return ShapedRecipeBuilder.shaped(item)
                 .define('W', Items.WATER_BUCKET)
                 .define('L', Items.LAVA_BUCKET)
