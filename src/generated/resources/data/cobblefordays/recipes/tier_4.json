@@ -1,24 +1,24 @@
 {
   "type": "minecraft:crafting_shaped",
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "L": {
+      "item": "minecraft:lava_bucket"
+    },
+    "R": {
+      "tag": "forge:ingots/gold"
+    },
+    "W": {
+      "item": "minecraft:water_bucket"
+    }
+  },
   "pattern": [
     "RRR",
     "WGL",
     "RRR"
   ],
-  "key": {
-    "W": {
-      "item": "minecraft:water_bucket"
-    },
-    "L": {
-      "item": "minecraft:lava_bucket"
-    },
-    "G": {
-      "item": "minecraft:glass"
-    },
-    "R": {
-      "tag": "forge:ingots/gold"
-    }
-  },
   "result": {
     "item": "cobblefordays:tier_4"
   }

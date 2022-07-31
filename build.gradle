@@ -29,7 +29,7 @@ ext {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.2-40.0.41'
+    minecraft 'net.minecraftforge:forge:1.19.1-42.0.1'
 }
 
 sourceSets {
@@ -41,7 +41,7 @@ sourceSets {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.18.2'
+    mappings channel: 'official', version: '1.19.1'
     //accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {

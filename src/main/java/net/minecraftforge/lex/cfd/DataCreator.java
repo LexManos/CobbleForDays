@@ -28,6 +28,7 @@ import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.data.DataGenerator;
@@ -54,11 +55,12 @@ import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.common.data.LanguageProvider;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 @EventBusSubscriber(modid = MODID, bus = Bus.MOD)
 public class DataCreator {
@@ -68,13 +70,13 @@ public class DataCreator {
         ExistingFileHelper helper = event.getExistingFileHelper();
 
         if (event.includeServer()) {
-            gen.addProvider(new Recipes(gen));
-            gen.addProvider(new Loots(gen));
+            gen.addProvider(true, new Recipes(gen));
+            gen.addProvider(true, new Loots(gen));
         }
         if (event.includeClient()) {
-            gen.addProvider(new Language(gen));
-            gen.addProvider(new BlockStates(gen, helper));
-            gen.addProvider(new ItemModels(gen, helper));
+            gen.addProvider(true, new Language(gen));
+            gen.addProvider(true, new BlockStates(gen, helper));
+            gen.addProvider(true, new ItemModels(gen, helper));
         }
     }
 
@@ -170,7 +172,7 @@ public class DataCreator {
         }
 
         private void makeTier(Block block) {
-            String path = block.getRegistryName().getPath();
+            String path = ForgeRegistries.BLOCKS.getKey(block).getPath();
             getBuilder(path)
             .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + path))); //TODO: Ask tterrag about this...
         }
@@ -197,9 +199,10 @@ public class DataCreator {
         }
 
         private void makeTier(Block block, ResourceLocation texture) {
-            ModelFile model = models().getBuilder(block.getRegistryName().getPath())
+            ModelFile model = models().getBuilder(ForgeRegistries.BLOCKS.getKey(block).getPath())
                 .parent(models().getExistingFile(modLoc("block/generator")))
-                .texture("material", texture);
+                .texture("material", texture)
+                .renderType("cutout");
             getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder().modelFile(model).build());
         }
     }
