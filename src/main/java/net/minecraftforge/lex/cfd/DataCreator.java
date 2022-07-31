@@ -29,6 +29,8 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.data.tags.BlockTagsProvider;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.data.DataGenerator;
@@ -61,6 +63,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import org.jetbrains.annotations.Nullable;
 
 @EventBusSubscriber(modid = MODID, bus = Bus.MOD)
 public class DataCreator {
@@ -72,6 +75,7 @@ public class DataCreator {
         if (event.includeServer()) {
             gen.addProvider(true, new Recipes(gen));
             gen.addProvider(true, new Loots(gen));
+            gen.addProvider(true, new ModTags(gen, helper));
         }
         if (event.includeClient()) {
             gen.addProvider(true, new Language(gen));
@@ -204,6 +208,23 @@ public class DataCreator {
                 .texture("material", texture)
                 .renderType("cutout");
             getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder().modelFile(model).build());
+        }
+    }
+
+    private static class ModTags extends BlockTagsProvider {
+
+        public ModTags(DataGenerator gen, @Nullable ExistingFileHelper helper) {
+            super(gen, MODID, helper);
+        }
+
+        @Override
+        protected void addTags() {
+            this.tag(BlockTags.MINEABLE_WITH_PICKAXE)
+                    .add(TIER1_BLOCK.get())
+                    .add(TIER2_BLOCK.get())
+                    .add(TIER3_BLOCK.get())
+                    .add(TIER4_BLOCK.get())
+                    .add(TIER5_BLOCK.get());
         }
     }
 }
