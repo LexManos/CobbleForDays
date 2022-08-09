@@ -1,27 +1,19 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net/' }
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.+', changing: true
-        classpath 'net.minecraftforge:GradleUtils:1.+'
-    }
-}
-
 plugins {
   id 'org.cadixdev.licenser' version '0.6.1'
   id 'maven-publish'
   id 'java'
   id 'eclipse'
   id 'idea'
+  id 'net.minecraftforge.gradleutils' version '2.+'
+  id 'net.minecraftforge.gradle' version '5+'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'net.minecraftforge.gradleutils'
 
 repositories {
     mavenCentral()
+}
+
+changelog {
+    fromTag '1.0'
 }
 
 ext {
@@ -135,8 +127,6 @@ jar.finalizedBy('reobfJar')
 artifacts {
     archives jar
     archives sourcesJar
-    if (changelog.exists())
-        archives changelog
 }
 
 jar {
@@ -148,11 +138,6 @@ publishing {
         mavenJava(MavenPublication) {
             artifact jar
             artifact sourcesJar
-            if (changelog.exists()) {
-                artifact(changelog){
-                    classifier 'changelog'
-                }
-            }
             pom {
                 name = project.archivesBaseName
                 packaging = 'jar'
@@ -179,19 +164,6 @@ publishing {
         }
     }
     repositories {
-        maven {
-            if (System.env.MAVEN_USER) {
-                url 'https://maven.minecraftforge.net/'
-                authentication {
-                    basic(BasicAuthentication)
-                }
-                credentials {
-                    username = System.env.MAVEN_USER ?: 'not'
-                    password = System.env.MAVEN_PASSWORD ?: 'set'
-                }
-            } else {
-                url 'file://' + rootProject.file('repo').getAbsolutePath()
-            }
-        }
+        maven gradleutils.getPublishingForgeMaven()
     }
 }
