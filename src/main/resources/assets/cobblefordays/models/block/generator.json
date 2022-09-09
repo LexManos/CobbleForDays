@@ -6,6 +6,7 @@
     "water": "block/water_still",
     "lava": "block/lava_still"
   },
+  "render_type": "cutout",
   "elements": [{
     "from": [  0, 0,  0 ],
     "to"  : [ 16, 4, 16 ],
