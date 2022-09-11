@@ -206,14 +206,14 @@ public class CobbleGenTile extends BlockEntity {
     }
 
     public static CobbleGenTile create(int tier, BlockPos blockPos, BlockState blockState) {
-        switch (tier) {
-            case 1: return new CobbleGenTile(Config.SERVER.tier1, TIER1_TILE.get(), blockPos, blockState);
-            case 2: return new CobbleGenTile(Config.SERVER.tier2, TIER2_TILE.get(), blockPos, blockState);
-            case 3: return new CobbleGenTile(Config.SERVER.tier3, TIER3_TILE.get(), blockPos, blockState);
-            case 4: return new CobbleGenTile(Config.SERVER.tier4, TIER4_TILE.get(), blockPos, blockState);
-            case 5: return new CobbleGenTile(Config.SERVER.tier5, TIER5_TILE.get(), blockPos, blockState);
-            default: throw new IllegalArgumentException("Unknown Tier: " + tier);
-        }
+        return switch (tier) {
+            case 1 -> new CobbleGenTile(Config.SERVER.tier1, TIER1_TILE.get(), blockPos, blockState);
+            case 2 -> new CobbleGenTile(Config.SERVER.tier2, TIER2_TILE.get(), blockPos, blockState);
+            case 3 -> new CobbleGenTile(Config.SERVER.tier3, TIER3_TILE.get(), blockPos, blockState);
+            case 4 -> new CobbleGenTile(Config.SERVER.tier4, TIER4_TILE.get(), blockPos, blockState);
+            case 5 -> new CobbleGenTile(Config.SERVER.tier5, TIER5_TILE.get(), blockPos, blockState);
+            default -> throw new IllegalArgumentException("Unknown Tier: " + tier);
+        };
     }
 
     public static BlockEntityType.BlockEntitySupplier<CobbleGenTile> createSupplier(int tier) {
