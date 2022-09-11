@@ -22,8 +22,6 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CreativeModeTab;
@@ -55,7 +53,7 @@ public class CobbleForDays {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
 
-    private static final Block.Properties blockProps = Block.Properties.of(Material.GLASS).strength(3.5F).lightLevel(state -> 15); // @mcp: lightLevel = lightLevel
+    private static final Block.Properties blockProps = Block.Properties.of(Material.GLASS).strength(3.5F).lightLevel(state -> 15);
     private static final Item.Properties  itemProps  = new Item.Properties().tab(CreativeModeTab.TAB_MISC);
 
     public static final RegistryObject<Block> TIER1_BLOCK = BLOCKS.register("tier_1", () -> new CobbleGenBlock(1, blockProps));
@@ -79,7 +77,6 @@ public class CobbleForDays {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
         TILES.register(FMLJavaModLoadingContext.get().getModEventBus());
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
             FMLJavaModLoadingContext.get().getModEventBus().addListener(this::colorGeneratorBlockWater);
@@ -92,16 +89,14 @@ public class CobbleForDays {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.serverSpec);
     }
 
-    private void setup(final FMLCommonSetupEvent event) {}
-
-    public void colorGeneratorBlockWater(RegisterColorHandlersEvent.Block event) {
+    public void colorGeneratorBlockWater(RegisterColorHandlersEvent .Block event) {
         event.register(
                 (blockState, environmentBlockReader, pos, index) -> index == 1 ? environmentBlockReader != null && pos != null ? BiomeColors.getAverageWaterColor(environmentBlockReader, pos) : PLAINS.get().getWaterColor() : -1,
                 BLOCKS.getEntries().stream().filter(RegistryObject::isPresent).map(RegistryObject::get).toArray(Block[]::new)
         );
     }
 
-    public void colorGeneratorItemWater(RegisterColorHandlersEvent.Item event) {
+    public void colorGeneratorItemWater(RegisterColorHandlersEvent .Item event) {
         event.register(
                 (stack, index) -> index == 1 ? PLAINS.get().getWaterColor() : -1,
                 ITEMS.getEntries().stream().filter(RegistryObject::isPresent).map(RegistryObject::get).toArray(Item[]::new)

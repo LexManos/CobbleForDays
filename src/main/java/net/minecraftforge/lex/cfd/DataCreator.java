@@ -28,7 +28,6 @@ import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
@@ -59,7 +58,6 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.common.data.LanguageProvider;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
@@ -72,16 +70,13 @@ public class DataCreator {
         DataGenerator gen = event.getGenerator();
         ExistingFileHelper helper = event.getExistingFileHelper();
 
-        if (event.includeServer()) {
-            gen.addProvider(true, new Recipes(gen));
-            gen.addProvider(true, new Loots(gen));
-            gen.addProvider(true, new ModTags(gen, helper));
-        }
-        if (event.includeClient()) {
-            gen.addProvider(true, new Language(gen));
-            gen.addProvider(true, new BlockStates(gen, helper));
-            gen.addProvider(true, new ItemModels(gen, helper));
-        }
+        gen.addProvider(event.includeServer(), new Recipes(gen));
+        gen.addProvider(event.includeServer(), new Loots(gen));
+        gen.addProvider(true, new ModTags(gen, helper));
+
+        gen.addProvider(event.includeClient(), new Language(gen));
+        gen.addProvider(event.includeClient(), new BlockStates(gen, helper));
+        gen.addProvider(event.includeClient(), new ItemModels(gen, helper));
     }
 
     private static class Recipes extends RecipeProvider {
@@ -168,15 +163,15 @@ public class DataCreator {
 
         @Override
         protected void registerModels() {
-            makeTier(TIER1_BLOCK.get());
-            makeTier(TIER2_BLOCK.get());
-            makeTier(TIER3_BLOCK.get());
-            makeTier(TIER4_BLOCK.get());
-            makeTier(TIER5_BLOCK.get());
+            makeTier(TIER1_BLOCK);
+            makeTier(TIER2_BLOCK);
+            makeTier(TIER3_BLOCK);
+            makeTier(TIER4_BLOCK);
+            makeTier(TIER5_BLOCK);
         }
 
-        private void makeTier(Block block) {
-            String path = ForgeRegistries.BLOCKS.getKey(block).getPath();
+        private void makeTier(RegistryObject<Block> block) {
+            String path = block.getKey().location().getPath();
             getBuilder(path)
             .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + path))); //TODO: Ask tterrag about this...
         }
@@ -195,19 +190,18 @@ public class DataCreator {
 
         @Override
         protected void registerStatesAndModels() {
-            makeTier(TIER1_BLOCK.get(), mcLoc("block/acacia_log"));
-            makeTier(TIER2_BLOCK.get(), mcLoc("block/cobblestone"));
-            makeTier(TIER3_BLOCK.get(), mcLoc("block/iron_block"));
-            makeTier(TIER4_BLOCK.get(), mcLoc("block/gold_block"));
-            makeTier(TIER5_BLOCK.get(), mcLoc("block/diamond_block"));
+            makeTier(TIER1_BLOCK, mcLoc("block/acacia_log"));
+            makeTier(TIER2_BLOCK, mcLoc("block/cobblestone"));
+            makeTier(TIER3_BLOCK, mcLoc("block/iron_block"));
+            makeTier(TIER4_BLOCK, mcLoc("block/gold_block"));
+            makeTier(TIER5_BLOCK, mcLoc("block/diamond_block"));
         }
 
-        private void makeTier(Block block, ResourceLocation texture) {
-            ModelFile model = models().getBuilder(ForgeRegistries.BLOCKS.getKey(block).getPath())
+        private void makeTier(RegistryObject<Block> block, ResourceLocation texture) {
+            ModelFile model = models().getBuilder(block.getKey().location().getPath())
                 .parent(models().getExistingFile(modLoc("block/generator")))
-                .texture("material", texture)
-                .renderType("cutout");
-            getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder().modelFile(model).build());
+                .texture("material", texture);
+            getVariantBuilder(block.get()).forAllStates(state -> ConfiguredModel.builder().modelFile(model).build());
         }
     }
 
