@@ -72,7 +72,7 @@ public class DataCreator {
 
         gen.addProvider(event.includeServer(), new Recipes(gen));
         gen.addProvider(event.includeServer(), new Loots(gen));
-        gen.addProvider(true, new ModTags(gen, helper));
+        gen.addProvider(event.includeServer(), new ModTags(gen, helper));
 
         gen.addProvider(event.includeClient(), new Language(gen));
         gen.addProvider(event.includeClient(), new BlockStates(gen, helper));
