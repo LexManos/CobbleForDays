@@ -21,28 +21,24 @@ import static net.minecraftforge.lex.cfd.CobbleForDays.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.util.Pair;
-
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.ValidationContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.data.loot.BlockLoot;
+import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.level.ItemLike;
@@ -64,24 +60,25 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 public class DataCreator {
     @SubscribeEvent
     public static void gatherData(GatherDataEvent event) {
-        DataGenerator gen = event.getGenerator();
-        ExistingFileHelper helper = event.getExistingFileHelper();
+        var gen = event.getGenerator();
+        var out = gen.getPackOutput();
+        var helper = event.getExistingFileHelper();
 
-        gen.addProvider(event.includeServer(), new Recipes(gen));
-        gen.addProvider(event.includeServer(), new Loots(gen));
+        gen.addProvider(event.includeServer(), new Recipes(out));
+        gen.addProvider(event.includeServer(), new Loots(out));
 
-        gen.addProvider(event.includeClient(), new Language(gen));
-        gen.addProvider(event.includeClient(), new BlockStates(gen, helper));
-        gen.addProvider(event.includeClient(), new ItemModels(gen, helper));
+        gen.addProvider(event.includeClient(), new Language(out));
+        gen.addProvider(event.includeClient(), new BlockStates(out, helper));
+        gen.addProvider(event.includeClient(), new ItemModels(out, helper));
     }
 
     private static class Recipes extends RecipeProvider {
-        public Recipes(DataGenerator gen) {
-            super(gen);
+        public Recipes(PackOutput out) {
+            super(out);
         }
 
         @Override
-        protected void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
+        protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
             getTier(TIER1_BLOCK.get(), ItemTags.LOGS).save(consumer);
             getTier(TIER2_BLOCK.get(), Tags.Items.COBBLESTONE).save(consumer);
             getTier(TIER3_BLOCK.get(), Tags.Items.INGOTS_IRON).save(consumer);
@@ -90,7 +87,7 @@ public class DataCreator {
         }
 
         private ShapedRecipeBuilder getTier(ItemLike item, TagKey<Item> resource) {
-            return ShapedRecipeBuilder.shaped(item)
+            return ShapedRecipeBuilder.shaped(RecipeCategory.MISC, item)
                 .define('W', Items.WATER_BUCKET)
                 .define('L', Items.LAVA_BUCKET)
                 .define('G', Blocks.GLASS)
@@ -104,15 +101,8 @@ public class DataCreator {
     }
 
     private static class Loots extends LootTableProvider {
-        public Loots(DataGenerator gen) {
-            super(gen);
-        }
-
-        @Override
-        protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootContextParamSet>> getTables() {
-            return ImmutableList.of(
-                Pair.of(Blocks::new, LootContextParamSets.BLOCK)
-            );
+        public Loots(PackOutput out) {
+            super(out, Set.of(), List.of(new SubProviderEntry(Blocks::new, LootContextParamSets.BLOCK)));
         }
 
         @Override
@@ -120,9 +110,13 @@ public class DataCreator {
            map.forEach((name, table) -> LootTables.validate(validationResults, name, table));
         }
 
-        private class Blocks extends BlockLoot {
+        private static class Blocks extends BlockLootSubProvider {
+            protected Blocks() {
+                super(Set.of(), FeatureFlags.REGISTRY.allFlags());
+            }
+
             @Override
-            protected void addTables() {
+            protected void generate() {
                 this.dropSelf(TIER1_BLOCK.get());
                 this.dropSelf(TIER2_BLOCK.get());
                 this.dropSelf(TIER3_BLOCK.get());
@@ -138,8 +132,8 @@ public class DataCreator {
     }
 
     private static class Language extends LanguageProvider {
-        public Language(DataGenerator gen) {
-            super(gen, MODID, "en_us");
+        public Language(PackOutput out) {
+            super(out, MODID, "en_us");
         }
 
         @Override
@@ -153,8 +147,8 @@ public class DataCreator {
     }
 
     private static class ItemModels extends ItemModelProvider {
-        public ItemModels(DataGenerator gen, ExistingFileHelper helper) {
-            super(gen, MODID, helper);
+        public ItemModels(PackOutput out, ExistingFileHelper helper) {
+            super(out, MODID, helper);
         }
 
         @Override
@@ -180,8 +174,8 @@ public class DataCreator {
 
     private static class BlockStates extends BlockStateProvider {
 
-        public BlockStates(DataGenerator gen, ExistingFileHelper helper) {
-            super(gen, MODID, helper);
+        public BlockStates(PackOutput out, ExistingFileHelper helper) {
+            super(out, MODID, helper);
         }
 
         @Override
