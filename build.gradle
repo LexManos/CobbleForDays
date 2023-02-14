@@ -19,7 +19,7 @@ changelog {
 
 ext {
     GIT_REPO = 'LexManos/CobbleForDays'
-    MODRINTH_MC_VERSIONS = [ "1.19.1", "1.19.2", "1.19.3" ] // must be valid MC versions according to the mojang metadata; must have at least one version
+    MODRINTH_MC_VERSIONS = [ "1.19.3" ] // must be valid MC versions according to the mojang metadata; must have at least one version
     MODRINTH_CHANGELOG = ""
 }
 
