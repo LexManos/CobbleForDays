@@ -175,7 +175,7 @@ publishing {
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "cobblefordays"
-    versionNumber = project.version + "-TEST"
+    versionNumber = project.version
     versionName = project.version + " for " + ((MODRINTH_MC_VERSIONS.size() === 1) ? MODRINTH_MC_VERSIONS[0] : (MODRINTH_MC_VERSIONS[0] + "–" + MODRINTH_MC_VERSIONS[MODRINTH_MC_VERSIONS.size() - 1]))
     versionType = "release" // can be release, beta, or alpha
     uploadFile = jar
