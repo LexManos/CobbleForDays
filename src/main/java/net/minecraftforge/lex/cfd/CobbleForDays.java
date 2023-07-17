@@ -18,8 +18,8 @@
 package net.minecraftforge.lex.cfd;
 
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -27,7 +27,7 @@ import net.minecraft.client.renderer.BiomeColors;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.CreativeModeTabEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.registries.RegistryObject;
@@ -52,7 +52,7 @@ public class CobbleForDays {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
 
-    private static final Block.Properties blockProps = Block.Properties.of(Material.GLASS).strength(3.5F).lightLevel(state -> 15);
+    private static final Block.Properties blockProps = Block.Properties.copy(Blocks.GLASS).strength(3.5F).lightLevel(state -> 15);
     private static final Item.Properties  itemProps  = new Item.Properties();
 
     public static final RegistryObject<Block> TIER1_BLOCK = BLOCKS.register("tier_1", () -> new CobbleGenBlock(1, blockProps));
@@ -92,8 +92,8 @@ public class CobbleForDays {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.serverSpec);
     }
 
-    private void addCreative(CreativeModeTabEvent.BuildContents event) {
-        if (event.getTab() != CreativeModeTabs.FUNCTIONAL_BLOCKS)
+    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() != CreativeModeTabs.FUNCTIONAL_BLOCKS)
             return;
 
         event.accept(TIER1_ITEM);
