@@ -35,7 +35,6 @@ import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.data.loot.BlockLootSubProvider;
@@ -107,7 +106,7 @@ public class DataCreator {
 
         @Override
         protected void validate(Map<ResourceLocation, LootTable> map, ValidationContext validationResults) {
-           map.forEach((name, table) -> LootTables.validate(validationResults, name, table));
+           map.forEach((name, table) -> table.validate(validationResults));
         }
 
         private static class Blocks extends BlockLootSubProvider {
