@@ -6,6 +6,7 @@ plugins {
   id 'idea'
   id 'net.minecraftforge.gradleutils' version '2.+'
   id 'net.minecraftforge.gradle' version '5+'
+  id "com.modrinth.minotaur" version "2.7.+"
 }
 
 repositories {
@@ -18,6 +19,8 @@ changelog {
 
 ext {
     GIT_REPO = 'LexManos/CobbleForDays'
+    MODRINTH_MC_VERSIONS = [ "1.19.3" ] // must be valid MC versions according to the mojang metadata; must have at least one version
+    MODRINTH_CHANGELOG = ""
 }
 
 dependencies {
@@ -167,4 +170,16 @@ publishing {
     repositories {
         maven gradleutils.getPublishingForgeMaven()
     }
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = "cobblefordays"
+    versionNumber = project.version
+    versionName = project.version + " for " + ((MODRINTH_MC_VERSIONS.size() === 1) ? MODRINTH_MC_VERSIONS[0] : (MODRINTH_MC_VERSIONS[0] + "–" + MODRINTH_MC_VERSIONS[MODRINTH_MC_VERSIONS.size() - 1]))
+    versionType = "release" // can be release, beta, or alpha
+    uploadFile = jar
+    gameVersions = MODRINTH_MC_VERSIONS
+    changelog = MODRINTH_CHANGELOG
+    // debugMode = true
 }
