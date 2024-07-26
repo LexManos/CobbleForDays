@@ -39,7 +39,7 @@ public class CobbleForDays {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
 
-    private static final Block.Properties blockProps = Block.Properties.copy(Blocks.GLASS).strength(3.5F).lightLevel(state -> 15);
+    private static final Block.Properties blockProps = Block.Properties.ofFullCopy(Blocks.GLASS).strength(3.5F).lightLevel(state -> 15);
     private static final Item.Properties  itemProps  = new Item.Properties();
 
     public static final RegistryObject<Block> TIER1_BLOCK = BLOCKS.register("tier_1", () -> new CobbleGenBlock(1, blockProps));

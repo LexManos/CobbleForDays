@@ -34,9 +34,9 @@
   },
   "requirements": [
     [
+      "has_the_recipe",
       "has_lava",
-      "has_water",
-      "has_the_recipe"
+      "has_water"
     ]
   ],
   "rewards": {

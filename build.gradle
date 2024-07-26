@@ -21,7 +21,7 @@ ext {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.2.0'
+    minecraft 'net.minecraftforge:forge:1.20.4-49.1.0'
 }
 
 sourceSets {
@@ -33,7 +33,7 @@ sourceSets {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.20.1'
+    mappings channel: 'official', version: '1.20.4'
     //accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
@@ -124,6 +124,12 @@ task sourcesJar(type: Jar, dependsOn: applyRange) {
 jar.finalizedBy('reobfJar') 
 //However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfusication until publishing by doing
 //publish.dependsOn('reobfJar')
+
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
+}
 
 artifacts {
     archives jar
