@@ -109,8 +109,8 @@ public class DataCreator {
         }
 
         private static class Blocks extends BlockLootSubProvider {
-            protected Blocks() {
-                super(Set.of(), FeatureFlags.REGISTRY.allFlags());
+            protected Blocks(HolderLookup.Provider registries) {
+                super(Set.of(), FeatureFlags.REGISTRY.allFlags(), registries);
             }
 
             @Override
@@ -161,7 +161,7 @@ public class DataCreator {
         private void makeTier(RegistryObject<Block> block) {
             String path = block.getKey().location().getPath();
             getBuilder(path)
-            .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + path))); //TODO: Ask tterrag about this...
+            .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + path)));
         }
 
         @Override
