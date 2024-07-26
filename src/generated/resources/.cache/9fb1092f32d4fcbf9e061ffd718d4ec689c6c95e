@@ -1,11 +1,11 @@
-// 1.20.4	2024-07-26T11:48:37.0062158	Recipes
-7fa657ba9dd086c745d902aa6759107183255d7e data/cobblefordays/advancements/recipes/misc/tier_1.json
-d3f280bde8c5c3f362ff102d350b71c5a5b903c4 data/cobblefordays/advancements/recipes/misc/tier_2.json
-97a476b8e2d59b82c66462c59b8c846bbd52b0a6 data/cobblefordays/advancements/recipes/misc/tier_3.json
-397f5bf4a3282b7f2e009bd6c76bfaccb13cfb5c data/cobblefordays/advancements/recipes/misc/tier_4.json
-06e0a6665c4587857e5df85543894e65b0c7cb92 data/cobblefordays/advancements/recipes/misc/tier_5.json
-5c0d186c1912b67c68a5f8c5358a9843f02d82e4 data/cobblefordays/recipes/tier_1.json
-7b0b360408b3e10734f2b217f175c31b5b91120e data/cobblefordays/recipes/tier_2.json
-24d24d16073a8f201922214c18137184608bea31 data/cobblefordays/recipes/tier_3.json
-783722114de8d4dc101eec1b113d6b137f19b3a5 data/cobblefordays/recipes/tier_4.json
-3e3a2d16d7a91d8ebe663f6c01743e93b9dafbd4 data/cobblefordays/recipes/tier_5.json
+// 1.20.6	2024-07-26T12:39:20.4709251	Recipes
+295a79831b6d15a572ccf2f12f25dc1906979c8c data/cobblefordays/advancements/recipes/misc/tier_1.json
+9b59680fd8e0cbbb06488cd47f6ed648e330d4bd data/cobblefordays/advancements/recipes/misc/tier_2.json
+ed6a66e7ae1981ecc57518eedfa66f613e3be127 data/cobblefordays/advancements/recipes/misc/tier_3.json
+f008a8579b22da1a726c5c4d338d51be1392dc45 data/cobblefordays/advancements/recipes/misc/tier_4.json
+59ade2d86975513d8846d839fcfc763468d45b31 data/cobblefordays/advancements/recipes/misc/tier_5.json
+f10b31b5c81606df56144c24c0f919b4260d4dd4 data/cobblefordays/recipes/tier_1.json
+620657b344763359c13dae4f66a0a83318146d5e data/cobblefordays/recipes/tier_2.json
+753db157ad8556c1cd8c34c0553ab945386125a2 data/cobblefordays/recipes/tier_3.json
+7ce631df81e199affabc3aa8faad9d2acf4267e7 data/cobblefordays/recipes/tier_4.json
+af0a876e2c933e87a3b45ea0544385e807927336 data/cobblefordays/recipes/tier_5.json

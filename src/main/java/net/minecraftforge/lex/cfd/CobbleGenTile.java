@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
@@ -56,15 +57,15 @@ public class CobbleGenTile extends BlockEntity {
 
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider regs) {
+        super.loadAdditional(nbt, regs);
         count = nbt.contains("count") ? nbt.getInt("count") : 0;
         timer = nbt.contains("timer") ? nbt.getInt("timer") : 0;
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(CompoundTag nbt, HolderLookup.Provider regs) {
+        super.saveAdditional(nbt, regs);
         nbt.putInt("count", count);
         nbt.putInt("timer", timer);
     }

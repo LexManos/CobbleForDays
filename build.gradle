@@ -21,7 +21,9 @@ ext {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.4-49.1.0'
+    minecraft 'net.minecraftforge:forge:1.20.6-50.1.0'
+    // Hack fix for now, force jopt-simple to be exactly 5.0.4 because Mojang ships that version, but some transtive dependencies request 6.0+ 
+    implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 }
 
 sourceSets {
@@ -33,7 +35,7 @@ sourceSets {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.20.4'
+    mappings channel: 'official', version: '1.20.6'
     //accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
@@ -77,7 +79,8 @@ minecraft {
 group = 'net.minecraftforge.lex'
 version = gradleutils.tagOffsetVersion
 logger.lifecycle('Version: ' + version)
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.withSourcesJar()
 
 license {
   header project.file('LICENSE-header.txt')
@@ -102,38 +105,10 @@ compileJava {
     options.encoding = 'UTF-8'
 }
 
-//TODO: Temp Until we expose something sane in FG
-task extractRange(type: net.minecraftforge.gradle.common.tasks.ExtractRangeMap, dependsOn: classes) {
-    sources.from sourceSets.main.java.srcDirs
-    dependencies.from compileJava.classpath
-}
-
-task applyRange(type: net.minecraftforge.gradle.common.tasks.ApplyRangeMap, dependsOn: [extractRange, createMcpToSrg]) {
-    rangeMap.set extractRange.output
-    srgFiles.from createMcpToSrg.output
-    sources.from sourceSets.main.java.srcDirs
-}
-
-task sourcesJar(type: Jar, dependsOn: applyRange) {
-    archiveClassifier = 'sources'
-    from zipTree(applyRange.output)
-    manifest.from(MANIFEST)
-}
-
-// This is the preferred method to reobfusicate your jar file
-jar.finalizedBy('reobfJar') 
-//However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfusication until publishing by doing
-//publish.dependsOn('reobfJar')
-
 sourceSets.each {
     def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
     it.output.resourcesDir = dir
     it.java.destinationDirectory = dir
-}
-
-artifacts {
-    archives jar
-    archives sourcesJar
 }
 
 jar {
@@ -143,8 +118,7 @@ jar {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
-            artifact sourcesJar
+            from components.java
             pom {
                 name = project.archivesBaseName
                 packaging = 'jar'

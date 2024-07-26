@@ -7,7 +7,6 @@ package net.minecraftforge.lex.cfd;
 import static net.minecraftforge.lex.cfd.CobbleForDays.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -15,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -30,6 +30,7 @@ import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.level.ItemLike;
@@ -57,8 +58,8 @@ public class DataCreator {
         var regs = event.getLookupProvider();
         var helper = event.getExistingFileHelper();
 
-        gen.addProvider(event.includeServer(), new Recipes(out));
-        gen.addProvider(event.includeServer(), new Loots(out));
+        gen.addProvider(event.includeServer(), new Recipes(out, regs));
+        gen.addProvider(event.includeServer(), new Loots(out, regs));
         gen.addProvider(event.includeServer(), new TagsProvider(out, regs, helper));
 
         gen.addProvider(event.includeClient(), new Language(out));
@@ -67,8 +68,8 @@ public class DataCreator {
     }
 
     private static class Recipes extends RecipeProvider {
-        public Recipes(PackOutput out) {
-            super(out);
+        public Recipes(PackOutput out, CompletableFuture<HolderLookup.Provider> registries) {
+            super(out, registries);
         }
 
         @Override
@@ -95,13 +96,16 @@ public class DataCreator {
     }
 
     private static class Loots extends LootTableProvider {
-        public Loots(PackOutput out) {
-            super(out, Set.of(), List.of(new SubProviderEntry(Blocks::new, LootContextParamSets.BLOCK)));
+        public Loots(PackOutput out, CompletableFuture<HolderLookup.Provider> registries) {
+            super(out, Set.of(), List.of(new SubProviderEntry(Blocks::new, LootContextParamSets.BLOCK)), registries);
         }
 
         @Override
-        protected void validate(Map<ResourceLocation, LootTable> map, ValidationContext validationResults) {
-           map.forEach((name, table) -> table.validate(validationResults));
+        protected void validate(net.minecraft.core.Registry<LootTable> map, ValidationContext ctxt, ProblemReporter report) {
+           map.holders().forEach(table -> table.value().validate(
+               ctxt.setParams(table.value().getParamSet())
+                   .enterElement("{" + table.key().location() + "}", table.key())
+           ));
         }
 
         private static class Blocks extends BlockLootSubProvider {
