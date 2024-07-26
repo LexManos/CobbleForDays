@@ -1,11 +1,11 @@
 plugins {
-  id 'org.cadixdev.licenser' version '0.6.1'
   id 'maven-publish'
   id 'java'
   id 'eclipse'
   id 'idea'
-  id 'net.minecraftforge.gradleutils' version '2.+'
-  id 'net.minecraftforge.gradle' version '5+'
+  id 'net.minecraftforge.licenser' version '1.0.1'
+  id 'net.minecraftforge.gradleutils' version '[2.3,2.4)'
+  id 'net.minecraftforge.gradle' version '[6.0,6.1)'
 }
 
 repositories {
@@ -13,7 +13,7 @@ repositories {
 }
 
 changelog {
-    fromTag '1.0'
+    from '1.0'
 }
 
 ext {
@@ -21,7 +21,7 @@ ext {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.1.0'
+    minecraft 'net.minecraftforge:forge:1.20.1-47.2.0'
 }
 
 sourceSets {
@@ -33,7 +33,7 @@ sourceSets {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.19.3'
+    mappings channel: 'official', version: '1.20.1'
     //accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
@@ -75,7 +75,7 @@ minecraft {
 }
 
 group = 'net.minecraftforge.lex'
-version = gradleutils.getTagOffsetBranchVersion()
+version = gradleutils.tagOffsetVersion
 logger.lifecycle('Version: ' + version)
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -115,7 +115,7 @@ task applyRange(type: net.minecraftforge.gradle.common.tasks.ApplyRangeMap, depe
 }
 
 task sourcesJar(type: Jar, dependsOn: applyRange) {
-    classifier = 'sources'
+    archiveClassifier = 'sources'
     from zipTree(applyRange.output)
     manifest.from(MANIFEST)
 }
@@ -165,6 +165,6 @@ publishing {
         }
     }
     repositories {
-        maven gradleutils.getPublishingForgeMaven()
+        maven gradleutils.publishingForgeMaven
     }
 }
