@@ -9,7 +9,7 @@
       "item": "minecraft:lava_bucket"
     },
     "R": {
-      "tag": "forge:cobblestone"
+      "tag": "c:cobblestones"
     },
     "W": {
       "item": "minecraft:water_bucket"

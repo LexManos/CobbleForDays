@@ -9,7 +9,7 @@
       "item": "minecraft:lava_bucket"
     },
     "R": {
-      "tag": "forge:ingots/gold"
+      "tag": "c:ingots/gold"
     },
     "W": {
       "item": "minecraft:water_bucket"
