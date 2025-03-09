@@ -16,7 +16,6 @@ import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -59,8 +58,8 @@ public class CobbleForDays {
     public static final RegistryObject<BlockEntityType<CobbleGenTile>> TIER5_TILE = TILES.register("tier_5", () -> BlockEntityType.Builder.of(CobbleGenTile.createSupplier(5), TIER5_BLOCK.get()).build(null));
     private static final int PLAINS = 4159204;
 
-    public CobbleForDays() {
-        var modBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public CobbleForDays(FMLJavaModLoadingContext context) {
+        var modBus = context.getModEventBus();
         ITEMS.register(modBus);
         BLOCKS.register(modBus);
         TILES.register(modBus);
@@ -75,8 +74,8 @@ public class CobbleForDays {
 
         MinecraftForge.EVENT_BUS.register(this);
 
-        //ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ForgeConfig.clientSpec);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.serverSpec);
+        //context.registerConfig(ModConfig.Type.CLIENT, ForgeConfig.clientSpec);
+        context.registerConfig(ModConfig.Type.SERVER, Config.serverSpec);
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {

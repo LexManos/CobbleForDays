@@ -75,7 +75,7 @@ public class DataCreator {
         @Override
         protected void buildRecipes(RecipeOutput output) {
             getTier(TIER1_BLOCK.get(), ItemTags.LOGS).save(output);
-            getTier(TIER2_BLOCK.get(), Tags.Items.COBBLESTONE).save(output);
+            getTier(TIER2_BLOCK.get(), Tags.Items.COBBLESTONES).save(output);
             getTier(TIER3_BLOCK.get(), Tags.Items.INGOTS_IRON).save(output);
             getTier(TIER4_BLOCK.get(), Tags.Items.INGOTS_GOLD).save(output);
             getTier(TIER5_BLOCK.get(), Tags.Items.GEMS_DIAMOND).save(output);

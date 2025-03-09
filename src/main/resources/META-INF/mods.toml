@@ -8,3 +8,10 @@ license="LGPL 2.1"
     displayName="Cobble For Days"
     authors="Lex"
     description="A set of simple cobblestone generators. Mainly useful for servers that don't want multi-block cobblegens."
+    
+[[dependencies.cobblefordays]]
+    modId="forge"
+    mandatory=true
+    versionRange="[52.0.9,)"
+    ordering="NONE"
+    side="BOTH"
