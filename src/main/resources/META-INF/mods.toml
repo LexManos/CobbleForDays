@@ -12,6 +12,6 @@ license="LGPL 2.1"
 [[dependencies.cobblefordays]]
     modId="forge"
     mandatory=true
-    versionRange="[53.0.0,)"
+    versionRange="[54.0.0,)"
     ordering="NONE"
     side="BOTH"

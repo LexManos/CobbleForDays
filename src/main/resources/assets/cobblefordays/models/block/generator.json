@@ -52,10 +52,10 @@
     "to"  : [ 15, 9, 5 ],
     "shade": false,
     "faces": {
-      "up"   : { "texture": "#water", "tintindex": 1 },
-      "north": { "texture": "#water", "tintindex": 1 },
-      "west" : { "texture": "#water", "tintindex": 1 },
-      "east" : { "texture": "#water", "tintindex": 1 }
+      "up"   : { "texture": "#water", "tintindex": 0 },
+      "north": { "texture": "#water", "tintindex": 0 },
+      "west" : { "texture": "#water", "tintindex": 0 },
+      "east" : { "texture": "#water", "tintindex": 0 }
     }
   }, {
     "from": [  1, 4, 11 ],

@@ -10,9 +10,11 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.client.color.item.ItemTintSources;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -73,7 +75,7 @@ public class CobbleForDays {
         return TIERS[tier - 1];
     }
 
-    private static final int PLAINS = 4159204;
+    public static final int PLAINS = 4159204;
 
     public CobbleForDays(FMLJavaModLoadingContext context) {
         var modBus = context.getModEventBus();
@@ -86,7 +88,7 @@ public class CobbleForDays {
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
             modBus.addListener(this::colorGeneratorBlockWater);
-            modBus.addListener(this::colorGeneratorItemWater);
+            ItemTintSources.ID_MAPPER.put(ResourceLocation.fromNamespaceAndPath(MODID, "water"), WaterItemTint.CODEC);
         });
 
         MinecraftForge.EVENT_BUS.register(this);
@@ -113,15 +115,8 @@ public class CobbleForDays {
 
     public void colorGeneratorBlockWater(RegisterColorHandlersEvent.Block event) {
         event.register(
-            (state, env, pos, index) -> index == 1 ? env != null && pos != null ? BiomeColors.getAverageWaterColor(env, pos) : PLAINS : -1,
+            (state, env, pos, index) -> index == 0 ? env != null && pos != null ? BiomeColors.getAverageWaterColor(env, pos) : PLAINS : -1,
             BLOCKS.getEntries().stream().filter(RegistryObject::isPresent).map(RegistryObject::get).toArray(Block[]::new)
-        );
-    }
-
-    public void colorGeneratorItemWater(RegisterColorHandlersEvent.Item event) {
-        event.register(
-            (stack, index) -> index == 1 ? PLAINS : -1,
-            ITEMS.getEntries().stream().filter(RegistryObject::isPresent).map(RegistryObject::get).toArray(Item[]::new)
         );
     }
 }

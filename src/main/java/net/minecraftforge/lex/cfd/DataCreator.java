@@ -7,13 +7,22 @@ package net.minecraftforge.lex.cfd;
 import static net.minecraftforge.lex.cfd.CobbleForDays.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.client.data.models.BlockModelGenerators;
+import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.ModelProvider;
+import net.minecraft.client.data.models.model.ItemModelUtils;
+import net.minecraft.client.data.models.model.ModelTemplate;
+import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.data.PackOutput;
@@ -34,10 +43,6 @@ import net.minecraft.util.ProblemReporter;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
-import net.minecraftforge.client.model.generators.ConfiguredModel;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -62,8 +67,7 @@ public class DataCreator {
         gen.addProvider(event.includeServer(), new TagsProvider(out, regs, helper));
 
         gen.addProvider(event.includeClient(), new Language(out));
-        gen.addProvider(event.includeClient(), new BlockStates(out, helper));
-        gen.addProvider(event.includeClient(), new ItemModels(out, helper));
+        gen.addProvider(event.includeClient(), new Models(out));
     }
 
     private static RegistryObject<? extends Block> block(int tier) {
@@ -161,49 +165,51 @@ public class DataCreator {
         }
     }
 
-    private static class ItemModels extends ItemModelProvider {
-        public ItemModels(PackOutput out, ExistingFileHelper helper) {
-            super(out, MODID, helper);
+    private static class Models extends ModelProvider {
+        public Models(PackOutput out) {
+            super(out);
         }
 
         @Override
-        protected void registerModels() {
-            for (int x = 1; x <= TIER_COUNT; x++)
-                makeTier(block(x));
-        }
-
-        private void makeTier(RegistryObject<? extends Block> block) {
-            String path = block.getKey().location().getPath();
-            getBuilder(path)
-                .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + path)));
+        protected Stream<Block> getKnownBlocks() {
+            return BLOCKS.getEntries().stream().map(RegistryObject::get);
         }
 
         @Override
-        public String getName() {
-            return "Item Models";
-        }
-    }
-
-    private static class BlockStates extends BlockStateProvider {
-
-        public BlockStates(PackOutput out, ExistingFileHelper helper) {
-            super(out, MODID, helper);
+        protected Stream<Item> getKnownItems() {
+            return ITEMS.getEntries().stream().map(RegistryObject::get);
         }
 
         @Override
-        protected void registerStatesAndModels() {
-            makeTier(block(1), mcLoc("block/acacia_log"));
-            makeTier(block(2), mcLoc("block/cobblestone"));
-            makeTier(block(3), mcLoc("block/iron_block"));
-            makeTier(block(4), mcLoc("block/gold_block"));
-            makeTier(block(5), mcLoc("block/diamond_block"));
+        protected BlockModelGenerators getBlockModelGenerators(BlockStateGeneratorCollector blocks, ItemInfoCollector items, SimpleModelCollector models) {
+            var SLOT = TextureSlot.create("material");
+            var TEMPLATE = new ModelTemplate(Optional.of(modLoc("block/generator")), Optional.empty(), SLOT);
+
+            return new BlockModelGenerators(blocks, items, models) {
+                @Override
+                public void run() {
+                    makeTier(getTier(1), mcLoc("block/acacia_log"));
+                    makeTier(getTier(2), mcLoc("block/cobblestone"));
+                    makeTier(getTier(3), mcLoc("block/iron_block"));
+                    makeTier(getTier(4), mcLoc("block/gold_block"));
+                    makeTier(getTier(5), mcLoc("block/diamond_block"));
+                }
+
+                private void makeTier(Tier tier, ResourceLocation texture) {
+                    var baked = TEMPLATE.create(tier.block().get(), TextureMapping.singleSlot(SLOT, texture), this.modelOutput::accept);
+                    this.blockStateOutput.accept(createSimpleBlock(tier.block().get(), baked));
+                    this.itemModelOutput.accept(tier.item().get(), ItemModelUtils.tintedModel(baked, WaterItemTint.INSTANCE));
+                }
+            };
         }
 
-        private void makeTier(RegistryObject<? extends Block> block, ResourceLocation texture) {
-            ModelFile model = models().getBuilder(block.getKey().location().getPath())
-                .parent(models().getExistingFile(modLoc("block/generator")))
-                .texture("material", texture);
-            getVariantBuilder(block.get()).forAllStates(state -> ConfiguredModel.builder().modelFile(model).build());
+        @Override
+        protected ItemModelGenerators getItemModelGenerators(ItemInfoCollector items, SimpleModelCollector models) {
+            return new ItemModelGenerators(items, models) {
+                @Override
+                public void run() {
+                }
+            };
         }
     }
 
@@ -218,5 +224,13 @@ public class DataCreator {
             for (int x = 1; x <= TIER_COUNT; x++)
                 mineable.add(block(x).get());
         }
+    }
+
+    private static ResourceLocation modLoc(String name) {
+        return ResourceLocation.fromNamespaceAndPath(MODID, name);
+    }
+
+    private static ResourceLocation mcLoc(String name) {
+        return ResourceLocation.parse(name);
     }
 }

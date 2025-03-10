@@ -1,0 +1,11 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "cobblefordays:block/tier_1",
+    "tints": [
+      {
+        "type": "cobblefordays:water"
+      }
+    ]
+  }
+}
