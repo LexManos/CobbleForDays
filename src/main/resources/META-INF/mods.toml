@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[43,)"
 license="LGPL 2.1"
 
 [[mods]]
@@ -12,6 +12,6 @@ license="LGPL 2.1"
 [[dependencies.cobblefordays]]
     modId="forge"
     mandatory=true
-    versionRange="[52.0.9,)"
+    versionRange="[53.0.0,)"
     ordering="NONE"
     side="BOTH"

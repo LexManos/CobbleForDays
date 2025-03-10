@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "G": {
-      "item": "minecraft:glass"
-    },
-    "L": {
-      "item": "minecraft:lava_bucket"
-    },
-    "R": {
-      "tag": "minecraft:logs"
-    },
-    "W": {
-      "item": "minecraft:water_bucket"
-    }
+    "G": "minecraft:glass",
+    "L": "minecraft:lava_bucket",
+    "R": "#minecraft:logs",
+    "W": "minecraft:water_bucket"
   },
   "pattern": [
     "RRR",

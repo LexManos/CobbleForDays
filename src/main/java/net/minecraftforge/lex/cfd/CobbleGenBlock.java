@@ -11,19 +11,18 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.level.BlockGetter;
 
 public class CobbleGenBlock extends Block implements EntityBlock {
-    private static final VoxelShape RENDER_SHAPE = Shapes.join(
-            box(0.0D,  0.0D, 0.0D, 16.0D,  4.0D, 16.0D),
-            box(0.0D, 12.0D, 0.0D, 16.0D, 16.0D, 16.0D),
-            BooleanOp.OR);
+    private static final VoxelShape RENDER_SHAPE = Shapes.or(
+        box(0.0D,  0.0D, 0.0D, 16.0D,  4.0D, 16.0D),
+        box(0.0D, 12.0D, 0.0D, 16.0D, 16.0D, 16.0D)
+    );
     private final int tier;
     public CobbleGenBlock(int tier, Properties properties) {
         super(properties);
@@ -40,18 +39,20 @@ public class CobbleGenBlock extends Block implements EntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-        return blockEntityType == CobbleForDays.TIER1_TILE.get() || blockEntityType == CobbleForDays.TIER2_TILE.get() || blockEntityType == CobbleForDays.TIER3_TILE.get() ||
-               blockEntityType == CobbleForDays.TIER4_TILE.get() || blockEntityType == CobbleForDays.TIER5_TILE.get() ? (BlockEntityTicker<T>) new CobbleGenTile.Ticker() : null;
+        for (int i = 1; i <= CobbleForDays.TIER_COUNT; i++) {
+            if (blockEntityType == CobbleForDays.getTier(i).tile().get())
+                return (BlockEntityTicker<T>) new CobbleGenTile.Ticker();
+        }
+        return null;
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean p_220069_6_) {
-        if (pos.above().equals(fromPos))
-            ((CobbleGenTile)level.getBlockEntity(pos)).updateCache();
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean unknown) {
+        ((CobbleGenTile)level.getBlockEntity(pos)).updateCache();
     }
 
     @Override
-    public VoxelShape getOcclusionShape(BlockState state, BlockGetter worldIn, BlockPos pos) {
+    public VoxelShape getOcclusionShape(BlockState state) {
        return RENDER_SHAPE;
     }
 }

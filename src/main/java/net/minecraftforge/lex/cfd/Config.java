@@ -30,6 +30,17 @@ public class Config {
             builder.pop();
         }
 
+        public Tier getTier(int tier) {
+            switch (tier) {
+                case 1: return tier1;
+                case 2: return tier2;
+                case 3: return tier3;
+                case 4: return tier4;
+                case 5: return tier5;
+                default: throw new IllegalArgumentException("Invalid tier: " + tier);
+            }
+        }
+
         public static class Tier {
             public final IntValue count;
             public final IntValue interval;

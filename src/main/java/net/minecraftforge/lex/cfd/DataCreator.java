@@ -33,7 +33,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
@@ -58,7 +57,7 @@ public class DataCreator {
         var regs = event.getLookupProvider();
         var helper = event.getExistingFileHelper();
 
-        gen.addProvider(event.includeServer(), new Recipes(out, regs));
+        gen.addProvider(event.includeServer(), new Recipes.Runner(out, regs));
         gen.addProvider(event.includeServer(), new Loots(out, regs));
         gen.addProvider(event.includeServer(), new TagsProvider(out, regs, helper));
 
@@ -67,22 +66,26 @@ public class DataCreator {
         gen.addProvider(event.includeClient(), new ItemModels(out, helper));
     }
 
+    private static RegistryObject<? extends Block> block(int tier) {
+        return CobbleForDays.getTier(tier).block();
+    }
+
     private static class Recipes extends RecipeProvider {
-        public Recipes(PackOutput out, CompletableFuture<HolderLookup.Provider> registries) {
-            super(out, registries);
+        public Recipes(HolderLookup.Provider registries, RecipeOutput out) {
+            super(registries, out);
         }
 
         @Override
-        protected void buildRecipes(RecipeOutput output) {
-            getTier(TIER1_BLOCK.get(), ItemTags.LOGS).save(output);
-            getTier(TIER2_BLOCK.get(), Tags.Items.COBBLESTONES).save(output);
-            getTier(TIER3_BLOCK.get(), Tags.Items.INGOTS_IRON).save(output);
-            getTier(TIER4_BLOCK.get(), Tags.Items.INGOTS_GOLD).save(output);
-            getTier(TIER5_BLOCK.get(), Tags.Items.GEMS_DIAMOND).save(output);
+        protected void buildRecipes() {
+            getTier(block(1), ItemTags.LOGS).save(output);
+            getTier(block(2), Tags.Items.COBBLESTONES).save(output);
+            getTier(block(3), Tags.Items.INGOTS_IRON).save(output);
+            getTier(block(4), Tags.Items.INGOTS_GOLD).save(output);
+            getTier(block(5), Tags.Items.GEMS_DIAMOND).save(output);
         }
 
-        private ShapedRecipeBuilder getTier(ItemLike item, TagKey<Item> resource) {
-            return ShapedRecipeBuilder.shaped(RecipeCategory.MISC, item)
+        private ShapedRecipeBuilder getTier(RegistryObject<? extends Block> block, TagKey<Item> resource) {
+            return shaped(RecipeCategory.MISC, block.get())
                 .define('W', Items.WATER_BUCKET)
                 .define('L', Items.LAVA_BUCKET)
                 .define('G', Blocks.GLASS)
@@ -93,6 +96,23 @@ public class DataCreator {
                 .unlockedBy("has_lava", has(Items.LAVA_BUCKET))
                 .unlockedBy("has_water", has(Items.WATER_BUCKET));
         }
+
+        private static class Runner extends RecipeProvider.Runner {
+            protected Runner(PackOutput output, CompletableFuture<Provider> registries) {
+                super(output, registries);
+            }
+
+            @Override
+            public String getName() {
+                return "CobbleForDays Recipes";
+            }
+
+            @Override
+            protected RecipeProvider createRecipeProvider(Provider registries, RecipeOutput output) {
+                return new Recipes(registries, output);
+            }
+
+        }
     }
 
     private static class Loots extends LootTableProvider {
@@ -102,8 +122,8 @@ public class DataCreator {
 
         @Override
         protected void validate(net.minecraft.core.Registry<LootTable> map, ValidationContext ctxt, ProblemReporter report) {
-           map.holders().forEach(table -> table.value().validate(
-               ctxt.setParams(table.value().getParamSet())
+           map.listElements().forEach(table -> table.value().validate(
+               ctxt.setContextKeySet(table.value().getParamSet())
                    .enterElement("{" + table.key().location() + "}", table.key())
            ));
         }
@@ -115,11 +135,8 @@ public class DataCreator {
 
             @Override
             protected void generate() {
-                this.dropSelf(TIER1_BLOCK.get());
-                this.dropSelf(TIER2_BLOCK.get());
-                this.dropSelf(TIER3_BLOCK.get());
-                this.dropSelf(TIER4_BLOCK.get());
-                this.dropSelf(TIER5_BLOCK.get());
+                for (int x = 1; x <= TIER_COUNT; x++)
+                    this.dropSelf(block(x).get());
             }
 
             @Override
@@ -136,11 +153,11 @@ public class DataCreator {
 
         @Override
         protected void addTranslations() {
-            add(TIER1_BLOCK.get(), "Cobble Gen Tier1");
-            add(TIER2_BLOCK.get(), "Cobble Gen Tier2");
-            add(TIER3_BLOCK.get(), "Cobble Gen Tier3");
-            add(TIER4_BLOCK.get(), "Cobble Gen Tier4");
-            add(TIER5_BLOCK.get(), "Cobble Gen Tier5");
+            for (int x = 1; x <= TIER_COUNT; x++) {
+                var tier = getTier(x);
+                add(tier.block().get(), "Cobble Gen Tier" + x);
+                add(tier.item().get(), "Cobble Gen Tier" + x);
+            }
         }
     }
 
@@ -151,17 +168,14 @@ public class DataCreator {
 
         @Override
         protected void registerModels() {
-            makeTier(TIER1_BLOCK);
-            makeTier(TIER2_BLOCK);
-            makeTier(TIER3_BLOCK);
-            makeTier(TIER4_BLOCK);
-            makeTier(TIER5_BLOCK);
+            for (int x = 1; x <= TIER_COUNT; x++)
+                makeTier(block(x));
         }
 
-        private void makeTier(RegistryObject<Block> block) {
+        private void makeTier(RegistryObject<? extends Block> block) {
             String path = block.getKey().location().getPath();
             getBuilder(path)
-            .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + path)));
+                .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + path)));
         }
 
         @Override
@@ -178,14 +192,14 @@ public class DataCreator {
 
         @Override
         protected void registerStatesAndModels() {
-            makeTier(TIER1_BLOCK, mcLoc("block/acacia_log"));
-            makeTier(TIER2_BLOCK, mcLoc("block/cobblestone"));
-            makeTier(TIER3_BLOCK, mcLoc("block/iron_block"));
-            makeTier(TIER4_BLOCK, mcLoc("block/gold_block"));
-            makeTier(TIER5_BLOCK, mcLoc("block/diamond_block"));
+            makeTier(block(1), mcLoc("block/acacia_log"));
+            makeTier(block(2), mcLoc("block/cobblestone"));
+            makeTier(block(3), mcLoc("block/iron_block"));
+            makeTier(block(4), mcLoc("block/gold_block"));
+            makeTier(block(5), mcLoc("block/diamond_block"));
         }
 
-        private void makeTier(RegistryObject<Block> block, ResourceLocation texture) {
+        private void makeTier(RegistryObject<? extends Block> block, ResourceLocation texture) {
             ModelFile model = models().getBuilder(block.getKey().location().getPath())
                 .parent(models().getExistingFile(modLoc("block/generator")))
                 .texture("material", texture);
@@ -200,13 +214,9 @@ public class DataCreator {
 
         @Override
         protected void addTags(Provider provider) {
-            this.tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
-                TIER1_BLOCK.get(),
-                TIER2_BLOCK.get(),
-                TIER3_BLOCK.get(),
-                TIER4_BLOCK.get(),
-                TIER5_BLOCK.get()
-            );
+            var mineable = this.tag(BlockTags.MINEABLE_WITH_PICKAXE);
+            for (int x = 1; x <= TIER_COUNT; x++)
+                mineable.add(block(x).get());
         }
     }
 }

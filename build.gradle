@@ -21,7 +21,7 @@ ext {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.21.1-52.1.0'
+    minecraft 'net.minecraftforge:forge:1.21.3-53.1.0'
     // Hack fix for now, force jopt-simple to be exactly 5.0.4 because Mojang ships that version, but some transtive dependencies request 6.0+ 
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 }
@@ -35,7 +35,7 @@ sourceSets {
 }
 
 minecraft {
-    mappings channel: 'official', version: '1.21.1'
+    mappings channel: 'official', version: '1.21.3'
     //accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
